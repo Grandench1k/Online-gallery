@@ -5,4 +5,4 @@
 ### Added or Changed
 - Added project
 - Added this changelog
-- Added readme
+- Added readme and license

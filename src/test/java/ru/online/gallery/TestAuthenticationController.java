@@ -32,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ContextConfiguration(classes = TestAsyncConfiguration.class)
 public class TestAuthenticationController {
     @Autowired
-    private JwtService jwtService = new JwtServiceImpl();
+    private JwtService jwtService;
     @Autowired
     private UserRepository userRepository;
     @Autowired

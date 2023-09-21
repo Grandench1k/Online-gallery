@@ -37,7 +37,7 @@ public class TestUserControllerImpl {
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
     @Autowired
-    private JwtService jwtService = new JwtServiceImpl();
+    private JwtService jwtService;
     @Autowired
     private UserRepository userRepository;
     @Autowired
