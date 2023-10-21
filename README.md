@@ -63,7 +63,9 @@ or clone this project with git (On Windows, install [GIT Bash for Windows](https
 
 ```git clone https://github.com/Grandench1k/online-gallery.git```
 
-2. Change application.properties file
+2. setup credentials file for aws s3 [guide](https://docs.aws.amazon.com/sdk-for-java/latest/developer-guide/credentials-temporary.html#credentials-temporary-from-portal)
+
+3. Change application.properties file
  
 application.properties can be found in the following directory
 ``src/main/resources/application.properties``
@@ -116,7 +118,7 @@ springdoc.api-docs.path=/online-gallery-docs
 ```
 to get started, first enter all the empty values
 
-3. After you have done all the above and launched the application through the IDE, then go to the swagger user interface page
+4. After you have done all the above and launched the application through the IDE, then go to the swagger user interface page
 ```
 example:
 http://localhost:8080/swagger-ui/index.html

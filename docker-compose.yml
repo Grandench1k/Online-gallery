@@ -1,0 +1,38 @@
+version: '1'
+
+services:
+  app:
+    container_name: app
+    build:
+      dockerfile: Dockerfile
+    links:
+      - cache
+      - mongo
+    ports:
+      - 8080:8080
+    depends_on:
+      - mongo
+      - cache
+    environment:
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
+      - MONGODB_HOST=mongo
+      - MONGODB_PORT=27017
+      ##aws access key id
+      - AWS_ACCESS_KEY_ID=
+      ##aws secret access key
+      - AWS_SECRET_ACCESS_KEY=
+  mongo:
+    image: mongo:latest
+    container_name: mongo
+    restart: always
+    ports:
+      - 27017:27017
+  cache:
+    container_name: cache
+    image: redis:latest
+    ports:
+      - 6379:6379
+    restart: always
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
