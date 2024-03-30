@@ -1,4 +1,4 @@
-package java.com.online.gallery;
+package com.online.gallery;
 
 import com.online.gallery.model.Image;
 import com.online.gallery.model.Role;

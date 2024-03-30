@@ -1,4 +1,4 @@
-package java.com.online.gallery;
+package com.online.gallery;
 
 import com.online.gallery.model.Role;
 import com.online.gallery.model.User;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(classes = TestAsyncConfiguration.class)
+@ContextConfiguration(classes =TestAsyncConfiguration.class)
 public class TestUserControllerImpl {
     @Autowired
     private S3service s3service;

@@ -1,5 +1,8 @@
-package java.com.online.gallery;
+package com.online.gallery;
 
+import com.online.gallery.model.Role;
+import com.online.gallery.model.User;
+import com.online.gallery.model.Video;
 import com.online.gallery.repository.UserRepository;
 import com.online.gallery.repository.VideoRepository;
 import com.online.gallery.security.ApplicationConfiguration;
