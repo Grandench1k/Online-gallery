@@ -1,10 +1,9 @@
 package com.online.gallery.model;
 
 import com.online.gallery.exception.UserNotEnabledException;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,10 +15,9 @@ import java.util.Collection;
 import java.util.List;
 
 
-@Data
+@Getter
+@Setter
 @Builder
-@NoArgsConstructor(force = true)
-@AllArgsConstructor
 @Document(collection = "users")
 public class User implements UserDetails {
     @Id
@@ -29,8 +27,8 @@ public class User implements UserDetails {
     private String password;
     private String profileImageId;
     private Role role;
-    private boolean enabled = false;
-    private LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(15);
+    private boolean enabled;
+    private LocalDateTime expiredAt;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

@@ -4,7 +4,6 @@ import com.online.gallery.controller.ImageController;
 import com.online.gallery.model.Image;
 import com.online.gallery.service.ImageService;
 import com.online.gallery.service.UserService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,11 +15,15 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("api/v1/image")
 public class ImageControllerImpl implements ImageController {
     private final ImageService imageService;
     private final UserService userService;
+
+    public ImageControllerImpl(ImageService imageService, UserService userService) {
+        this.imageService = imageService;
+        this.userService = userService;
+    }
 
     @GetMapping
     public ResponseEntity<List<Image>> findAllImages(Authentication authentication) {

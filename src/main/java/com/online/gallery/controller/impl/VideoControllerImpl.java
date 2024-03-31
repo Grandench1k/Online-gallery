@@ -4,7 +4,6 @@ import com.online.gallery.controller.VideoController;
 import com.online.gallery.model.Video;
 import com.online.gallery.service.UserService;
 import com.online.gallery.service.impl.VideoServiceImpl;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,11 +15,15 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("api/v1/video")
 public class VideoControllerImpl implements VideoController {
     private final VideoServiceImpl videoServiceImpl;
     private final UserService userService;
+
+    public VideoControllerImpl(VideoServiceImpl videoServiceImpl, UserService userService) {
+        this.videoServiceImpl = videoServiceImpl;
+        this.userService = userService;
+    }
 
 
     @GetMapping

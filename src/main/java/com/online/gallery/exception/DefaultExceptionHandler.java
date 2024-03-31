@@ -1,5 +1,6 @@
 package com.online.gallery.exception;
 
+import com.online.gallery.dto.response.BadRequestResponse;
 import com.online.gallery.dto.response.DefaultExceptionResponse;
 import jakarta.mail.MessagingException;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
@@ -14,7 +15,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
-import com.online.gallery.dto.response.BadRequestResponse;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;

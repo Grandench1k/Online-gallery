@@ -7,7 +7,6 @@ import com.online.gallery.model.Image;
 import com.online.gallery.repository.ImageRepository;
 import com.online.gallery.service.ImageService;
 import com.online.gallery.storage.s3.S3service;
-import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,12 +20,16 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 public class ImageServiceImpl implements ImageService {
     private final ImageRepository imageRepository;
     private final S3service s3service;
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
+
+    public ImageServiceImpl(ImageRepository imageRepository, S3service s3service) {
+        this.imageRepository = imageRepository;
+        this.s3service = s3service;
+    }
 
     public String generateLinkWithUserIdForS3Images(String userId) {
         return "images/" + userId + "/";

@@ -1,8 +1,8 @@
 package com.online.gallery.controller;
 
 import com.online.gallery.dto.response.BadRequestResponse;
-import com.online.gallery.dto.response.NotFoundResponse;
 import com.online.gallery.dto.response.DefaultExceptionResponse;
+import com.online.gallery.dto.response.NotFoundResponse;
 import com.online.gallery.model.Image;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

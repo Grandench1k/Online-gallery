@@ -1,7 +1,6 @@
 package com.online.gallery.storage.s3.impl;
 
 import com.online.gallery.storage.s3.S3service;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -13,10 +12,13 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
 
-@RequiredArgsConstructor
 @Service
 public class S3serviceImpl implements S3service {
     private final S3Client s3;
+
+    public S3serviceImpl(S3Client s3) {
+        this.s3 = s3;
+    }
 
     public void putObject(String bucketName, String key, byte[] file) {
         PutObjectRequest objectRequest = PutObjectRequest.builder()

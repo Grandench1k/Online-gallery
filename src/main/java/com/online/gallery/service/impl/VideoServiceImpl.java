@@ -7,7 +7,6 @@ import com.online.gallery.model.Video;
 import com.online.gallery.repository.VideoRepository;
 import com.online.gallery.service.VideoService;
 import com.online.gallery.storage.s3.S3service;
-import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -21,12 +20,16 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 public class VideoServiceImpl implements VideoService {
     private final VideoRepository videoRepository;
     private final S3service s3service;
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
+
+    public VideoServiceImpl(VideoRepository videoRepository, S3service s3service) {
+        this.videoRepository = videoRepository;
+        this.s3service = s3service;
+    }
 
     public String generateLinkWithUserIdForS3Videos(String userId) {
         return "videos/" + userId + "/";

@@ -1,11 +1,11 @@
 package com.online.gallery.exception;
 
+import com.online.gallery.controller.UserController;
+import com.online.gallery.dto.response.BadRequestResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import com.online.gallery.controller.UserController;
-import com.online.gallery.dto.response.BadRequestResponse;
 
 @RestControllerAdvice(basePackageClasses = UserController.class)
 public class UserExceptionHandler {

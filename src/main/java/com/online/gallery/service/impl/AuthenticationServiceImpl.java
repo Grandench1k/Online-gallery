@@ -19,7 +19,6 @@ import com.online.gallery.service.AuthenticationService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,7 +32,6 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class AuthenticationServiceImpl implements AuthenticationService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
@@ -42,6 +40,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManager authenticationManager;
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+
+    public AuthenticationServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService, MailSenderImpl mailSenderImpl, AuthenticationManager authenticationManager, ConfirmationTokenRepository confirmationTokenRepository, PasswordResetTokenRepository passwordResetTokenRepository) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.mailSenderImpl = mailSenderImpl;
+        this.authenticationManager = authenticationManager;
+        this.confirmationTokenRepository = confirmationTokenRepository;
+        this.passwordResetTokenRepository = passwordResetTokenRepository;
+    }
 
     public AuthenticationResponse register(RegisterRequest request) throws UserDuplicationException, MessagingException {
         String email = request.getEmail();

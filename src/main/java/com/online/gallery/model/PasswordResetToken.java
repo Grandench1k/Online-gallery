@@ -1,14 +1,14 @@
 package com.online.gallery.model;
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Data
-@RequiredArgsConstructor
+@Getter
+@Setter
 @Document(collection = "passwordResetToken")
 public class PasswordResetToken {
     @Id

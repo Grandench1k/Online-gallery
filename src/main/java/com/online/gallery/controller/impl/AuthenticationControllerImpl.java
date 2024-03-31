@@ -11,7 +11,6 @@ import com.online.gallery.service.AuthenticationService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -20,9 +19,12 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/v1/auth")
-@RequiredArgsConstructor
 public class AuthenticationControllerImpl implements AuthenticationController {
     private final AuthenticationService service;
+
+    public AuthenticationControllerImpl(AuthenticationService service) {
+        this.service = service;
+    }
 
     @PostMapping("/sign-up")
     public ResponseEntity<AuthenticationResponse> signUp(@RequestBody @Validated RegisterRequest request) throws MessagingException {

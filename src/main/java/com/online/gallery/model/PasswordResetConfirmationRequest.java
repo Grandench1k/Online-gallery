@@ -3,16 +3,14 @@ package com.online.gallery.model;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
 
-@Data
+@Getter
+@Setter
 @Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class PasswordResetConfirmationRequest {
     @Schema(name = "password", example = "password123", minLength = 8, maxLength = 50)
     @Length(min = 8, max = 50, message = "password must contain more than 8 characters and less than 50 characters")

@@ -5,7 +5,6 @@ import com.online.gallery.model.User;
 import com.online.gallery.repository.UserRepository;
 import com.online.gallery.service.UserService;
 import com.online.gallery.storage.s3.S3service;
-import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -17,13 +16,18 @@ import java.io.IOException;
 import java.util.Objects;
 
 @Service
-@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final S3service s3service;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
+
+    public UserServiceImpl(S3service s3service, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.s3service = s3service;
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public String generateLinkWithUserIdForS3ProfileImages(String userId) {
         return "profileImages/" + userId + "/";
