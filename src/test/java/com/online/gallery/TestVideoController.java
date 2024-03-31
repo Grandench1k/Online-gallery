@@ -64,7 +64,7 @@ public class TestVideoController {
         s3service.putObject(bucketName, "videos/" + userId + "/" + fileName, file);
         userRepository.save(user);
         jwtToken = jwtService.generateAccessToken(user);
-        videoRepository.save(Video.builder().userId(userId).name("video").uri(fileName).id(videoId).build());
+        videoRepository.save(videoRepository.save(new Video(videoId, "video", fileName, userId)));
     }
 
     @AfterEach
@@ -92,7 +92,7 @@ public class TestVideoController {
     public void getAllVideos() throws Exception {
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/v1/video")
+                .get("/api/v1/videos")
                 .header("Authorization", "Bearer " + jwtToken));
         //Then
         response.andExpect(status().isOk());
@@ -102,7 +102,7 @@ public class TestVideoController {
     public void getVideoById() throws Exception {
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/v1/video/" + videoId)
+                .get("/api/v1/videos/" + videoId)
                 .header("Authorization", "Bearer " + jwtToken));
         //Then
         response.andExpect(status().isOk());
@@ -114,7 +114,7 @@ public class TestVideoController {
         MockMultipartFile image = new MockMultipartFile("video", "", "application/json", "{\"name\": \"new Image\"}".getBytes());
         MockMultipartFile imageFile = new MockMultipartFile("videoFile", "video.mp4", "multipart/form-data", Files.readAllBytes(Path.of(absolutePath)));
         //When
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/video/save")
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/videos")
                 .file(image)
                 .file(imageFile)
                 .header("Authorization", "Bearer " + jwtToken)
@@ -128,7 +128,7 @@ public class TestVideoController {
         String body = "{ \"name\" : " + "\"new Video\"}";
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/v1/video/" + videoId + "/update").header("Authorization", "Bearer " + jwtToken)
+                .patch("/api/v1/videos/" + videoId).header("Authorization", "Bearer " + jwtToken)
                 .content(body)
                 .contentType("application/json"));
         //Then
@@ -139,7 +139,7 @@ public class TestVideoController {
     public void deleteVideoById() throws Exception {
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .delete("/api/v1/video/" + videoId + "/delete").header("Authorization", "Bearer " + jwtToken));
+                .delete("/api/v1/videos/" + videoId).header("Authorization", "Bearer " + jwtToken));
         //Then
         response.andExpect(status().isOk());
     }

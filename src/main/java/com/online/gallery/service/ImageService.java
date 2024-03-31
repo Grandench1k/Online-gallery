@@ -11,11 +11,11 @@ public interface ImageService {
 
     List<Image> findAllImages(String userId);
 
-    byte[] findImageById(String id, String userId);
+    byte[] findImageById(String imageId, String userId);
 
     Image saveImage(MultipartFile imageFile, Image image, String userId) throws IOException;
 
-    Image updateImageById(String id, Image image, String userId);
+    Image updateImageById(String imageId, Image image, String userId);
 
-    Image deleteImageById(String id, String userId);
+    Image deleteImageById(String imageId, String userId);
 }

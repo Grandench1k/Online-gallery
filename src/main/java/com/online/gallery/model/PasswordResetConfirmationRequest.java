@@ -10,7 +10,6 @@ import org.hibernate.validator.constraints.Length;
 
 @Getter
 @Setter
-@Builder
 public class PasswordResetConfirmationRequest {
     @Schema(name = "password", example = "password123", minLength = 8, maxLength = 50)
     @Length(min = 8, max = 50, message = "password must contain more than 8 characters and less than 50 characters")

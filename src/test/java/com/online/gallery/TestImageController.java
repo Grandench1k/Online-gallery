@@ -66,7 +66,7 @@ public class TestImageController {
         s3service.putObject(bucketName, "images/" + userId + "/" + fileName, file);
         userRepository.save(user);
         accessToken = jwtService.generateAccessToken(user);
-        imageRepository.save(Image.builder().userId(userId).name("image").uri(fileName).id(imageId).build());
+        imageRepository.save(new Image(imageId, "image", fileName, userId));
     }
 
     @AfterEach
@@ -94,7 +94,7 @@ public class TestImageController {
     public void getAllImages() throws Exception {
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/v1/image")
+                .get("/api/v1/images")
                 .header("Authorization", "Bearer " + accessToken));
         //Then
         response.andExpect(status().isOk());
@@ -104,7 +104,7 @@ public class TestImageController {
     public void getImageById() throws Exception {
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/v1/image/" + imageId)
+                .get("/api/v1/images/" + imageId)
                 .header("Authorization", "Bearer " + accessToken));
         //Then
         response.andExpect(status().isOk());
@@ -116,7 +116,7 @@ public class TestImageController {
         MockMultipartFile image = new MockMultipartFile("image", "", "application/json", "{\"name\": \"new Image\"}".getBytes());
         MockMultipartFile imageFile = new MockMultipartFile("imageFile", fileName, "multipart/form-data", Files.readAllBytes(Path.of(absolutePath)));
         //When
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/image/save")
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/images")
                 .file(image)
                 .file(imageFile)
                 .header("Authorization", "Bearer " + accessToken)
@@ -130,7 +130,7 @@ public class TestImageController {
         String body = "{ \"name\" : " + "\"new Image\"}";
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/v1/image/" + imageId + "/update").header("Authorization", "Bearer " + accessToken)
+                .patch("/api/v1/images/" + imageId).header("Authorization", "Bearer " + accessToken)
                 .content(body)
                 .contentType("application/json"));
         //Then
@@ -141,7 +141,7 @@ public class TestImageController {
     public void deleteImageById() throws Exception {
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .delete("/api/v1/image/" + imageId + "/delete").header("Authorization", "Bearer " + accessToken));
+                .delete("/api/v1/images/" + imageId).header("Authorization", "Bearer " + accessToken));
         //Then
         response.andExpect(status().isOk());
     }

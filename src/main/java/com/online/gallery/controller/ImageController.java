@@ -32,7 +32,7 @@ public interface ImageController {
             responses = {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "image/png")),
                     @ApiResponse(responseCode = "404", description = "Image with this id not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotFoundResponse.class)))})
-    ResponseEntity<byte[]> findImageById(@PathVariable String id, Authentication authentication);
+    ResponseEntity<byte[]> findImageById(@PathVariable String imageId, Authentication authentication);
 
     @Operation(summary = "POST image", description = "POST image by userId",
             responses = {
@@ -46,11 +46,11 @@ public interface ImageController {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Image.class))),
                     @ApiResponse(responseCode = "404", description = "Image with this id not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class))),
                     @ApiResponse(responseCode = "409", description = "Image with this name is already defined.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class)))})
-    ResponseEntity<Image> updateImageById(@PathVariable String id, @RequestBody Image image, Authentication authentication);
+    ResponseEntity<Image> updateImageById(@PathVariable String imageId, @RequestBody Image image, Authentication authentication);
 
     @Operation(summary = "DELETE image by Id", description = "DELETE image by Id and UserId",
             responses = {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Image.class))),
                     @ApiResponse(responseCode = "404", description = "Images not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DefaultExceptionResponse.class)))})
-    ResponseEntity<Image> deleteImageById(@PathVariable String id, Authentication authentication);
+    ResponseEntity<Image> deleteImageById(@PathVariable String imageId, Authentication authentication);
 }

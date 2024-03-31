@@ -14,7 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 
 @RestController
-@RequestMapping(value = "api/v1/user")
+@RequestMapping(value = "api/v1/users")
 public class UserControllerImpl implements UserController {
     private final UserService userService;
 
@@ -30,7 +30,7 @@ public class UserControllerImpl implements UserController {
         return ResponseEntity.ok().body(userService.getProfileImage(userService.createUser(authentication)));
     }
 
-    @PostMapping(value = "/profileImage/save", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/profileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<OkResponse> saveUserProfileImage(
             @RequestPart MultipartFile profileImageFile,
             Authentication authentication) throws IOException {
@@ -40,7 +40,7 @@ public class UserControllerImpl implements UserController {
                         userService.createUser(authentication))));
     }
 
-    @PatchMapping(value = "/profileImage/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/profileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<OkResponse> updateUserProfileImage(
             @RequestPart MultipartFile profileImageFile,
             Authentication authentication) throws IOException {

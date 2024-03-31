@@ -43,9 +43,8 @@ public class ImageServiceImpl implements ImageService {
         return allImages;
     }
 
-    @Cacheable(cacheNames = "imageCache", key = "#id")
-    public byte[] findImageById(String id, String userId) {
-        Image image = imageRepository.findByIdAndUserId(id, userId)
+    public byte[] findImageById(String imageId, String userId) {
+        Image image = imageRepository.findByIdAndUserId(imageId, userId)
                 .orElseThrow(() -> new ImageNotFoundException("image with this id not found."));
         return s3service.getObject(bucketName, generateLinkWithUserIdForS3Images(userId) + image.getUri());
     }
@@ -82,9 +81,9 @@ public class ImageServiceImpl implements ImageService {
     }
 
 
-    @CachePut(cacheNames = "imageCache", key = "#id")
-    public Image updateImageById(String id, Image image, String userId) {
-        Image imageToUpdate = imageRepository.findByIdAndUserId(id, userId)
+    @CachePut(cacheNames = "imageCache", key = "#imageId")
+    public Image updateImageById(String imageId, Image image, String userId) {
+        Image imageToUpdate = imageRepository.findByIdAndUserId(imageId, userId)
                 .orElseThrow(() -> new ImageNotFoundException("image with this id not found."));
         String imageName = image.getName();
         if (imageRepository.findByNameAndUserId(imageName, userId).isPresent()) {
@@ -95,9 +94,9 @@ public class ImageServiceImpl implements ImageService {
         return imageToUpdate;
     }
 
-    @CacheEvict(cacheNames = "imageCache", key = "#id")
-    public Image deleteImageById(String id, String userId) {
-        Image imageToDelete = imageRepository.findByIdAndUserId(id, userId)
+    @CacheEvict(cacheNames = "imageCache", key = "#imageId")
+    public Image deleteImageById(String imageId, String userId) {
+        Image imageToDelete = imageRepository.findByIdAndUserId(imageId, userId)
                 .orElseThrow(() -> new ImageNotFoundException("image with this id not found."));
         s3service.deleteObject(bucketName, "images/" + imageToDelete.getUri());
         imageRepository.delete(imageToDelete);

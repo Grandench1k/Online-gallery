@@ -14,10 +14,11 @@ public class PasswordResetToken {
     @Id
     private String id;
     private String email;
-    private LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(15);
+    private LocalDateTime expiredAt;
 
     public PasswordResetToken(String id, String email) {
         this.id = id;
         this.email = email;
+        setExpiredAt(LocalDateTime.now().plusMinutes(15));
     }
 }

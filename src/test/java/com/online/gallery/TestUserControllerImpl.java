@@ -85,7 +85,7 @@ public class TestUserControllerImpl {
     public void getProfileImage() throws Exception {
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .get("/api/v1/user/profileImage")
+                .get("/api/v1/users/profileImage")
                 .header("Authorization", "Bearer " + jwtToken));
         //Then
         response.andExpect(status().isOk());
@@ -96,7 +96,7 @@ public class TestUserControllerImpl {
         //Given
         MockMultipartFile imageFile = new MockMultipartFile("profileImageFile", "image.jpg", "multipart/form-data", Files.readAllBytes(Path.of(absolutePath)));
         //When
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/user/profileImage/save")
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/v1/users/profileImage")
                 .file(imageFile)
                 .header("Authorization", "Bearer " + jwtToken)
                 .contentType(MediaType.MULTIPART_FORM_DATA));
@@ -109,7 +109,7 @@ public class TestUserControllerImpl {
         //Given
         MockMultipartFile imageFile = new MockMultipartFile("profileImageFile", "image.jpg", "multipart/form-data", Files.readAllBytes(Path.of(absolutePath)));
         //When
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/user/profileImage/update")
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.multipart(HttpMethod.PATCH, "/api/v1/users/profileImage")
                 .file(imageFile)
                 .header("Authorization", "Bearer " + jwtToken)
                 .contentType(MediaType.MULTIPART_FORM_DATA));
@@ -123,7 +123,7 @@ public class TestUserControllerImpl {
         String passwords = "{\"old_password\": \"example\", \"new_password\": \"example1\"}";
         //When
         ResultActions response = mockMvc.perform(MockMvcRequestBuilders
-                .patch("/api/v1/user/password")
+                .patch("/api/v1/users/password")
                 .header("Authorization", "Bearer " + jwtToken)
                 .content(passwords)
                 .contentType("application/json"));

@@ -43,9 +43,8 @@ public class VideoServiceImpl implements VideoService {
         return allVideos;
     }
 
-    @Cacheable(cacheNames = "videoCache", key = "#id")
-    public byte[] findVideoById(String id, String userId) {
-        Video video = videoRepository.findByIdAndUserId(id, userId)
+    public byte[] findVideoById(String videoId, String userId) {
+        Video video = videoRepository.findByIdAndUserId(videoId, userId)
                 .orElseThrow(() -> new VideoNotFoundException("video with this id Not Found."));
         return s3service.getObject(bucketName, generateLinkWithUserIdForS3Videos(userId) + video.getUri());
     }
@@ -80,8 +79,8 @@ public class VideoServiceImpl implements VideoService {
     }
 
     @CachePut(cacheNames = "videoCache")
-    public Video updateVideoById(String id, Video video, String userId) {
-        Video videoToUpdate = videoRepository.findByIdAndUserId(id, userId)
+    public Video updateVideoById(String videoId, Video video, String userId) {
+        Video videoToUpdate = videoRepository.findByIdAndUserId(videoId, userId)
                 .orElseThrow(() -> new VideoNotFoundException("video with this id not found."));
         String videoName = video.getName();
         if (videoRepository.findByNameAndUserId(videoName, userId).isPresent()) {
@@ -92,9 +91,9 @@ public class VideoServiceImpl implements VideoService {
         return videoToUpdate;
     }
 
-    @CacheEvict(cacheNames = "videoCache", key = "#id")
-    public Video deleteVideoById(String id, String userId) {
-        Video videoToDelete = videoRepository.findByIdAndUserId(id, userId)
+    @CacheEvict(cacheNames = "videoCache", key = "#videoId")
+    public Video deleteVideoById(String videoId, String userId) {
+        Video videoToDelete = videoRepository.findByIdAndUserId(videoId, userId)
                 .orElseThrow(() -> new VideoNotFoundException("video with this id not found."));
         s3service.deleteObject(bucketName, videoToDelete.getUri());
         videoRepository.delete(videoToDelete);

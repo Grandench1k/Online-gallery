@@ -42,6 +42,8 @@ public interface AuthenticationController {
                     @ApiResponse(responseCode = "404", description = "user not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotFoundResponse.class)))})
     ResponseEntity<AuthenticationResponse> signIn(AuthenticationRequest request);
 
+    ResponseEntity<OkResponse> logOut();
+
 
     @Operation(summary = "refresh access token",
             responses = {

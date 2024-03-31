@@ -15,7 +15,7 @@ import java.io.IOException;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/image")
+@RequestMapping("api/v1/images")
 public class ImageControllerImpl implements ImageController {
     private final ImageService imageService;
     private final UserService userService;
@@ -30,7 +30,7 @@ public class ImageControllerImpl implements ImageController {
         return ResponseEntity.ok().body(imageService.findAllImages(userService.createUserAndReturnUserId(authentication)));
     }
 
-    @GetMapping(value = "/{id}", produces = {
+    @GetMapping(value = "/{imageId}", produces = {
             MediaType.IMAGE_JPEG_VALUE,
             MediaType.IMAGE_GIF_VALUE,
             MediaType.IMAGE_PNG_VALUE,
@@ -39,12 +39,12 @@ public class ImageControllerImpl implements ImageController {
             "image/jpg",
             "image/webp"})
     public ResponseEntity<byte[]> findImageById(
-            @PathVariable String id,
+            @PathVariable String imageId,
             Authentication authentication) {
-        return ResponseEntity.ok().body(imageService.findImageById(id, userService.createUserAndReturnUserId(authentication)));
+        return ResponseEntity.ok().body(imageService.findImageById(imageId, userService.createUserAndReturnUserId(authentication)));
     }
 
-    @PostMapping(value = "/save", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Image> saveImage(
             @RequestPart @Validated Image image,
             @RequestPart MultipartFile imageFile,
@@ -52,18 +52,18 @@ public class ImageControllerImpl implements ImageController {
         return ResponseEntity.ok().body(imageService.saveImage(imageFile, image, userService.createUserAndReturnUserId(authentication)));
     }
 
-    @PatchMapping("/{id}/update")
+    @PatchMapping("/{imageId}")
     public ResponseEntity<Image> updateImageById(
-            @PathVariable String id,
+            @PathVariable String imageId,
             @RequestBody @Validated Image image,
             Authentication authentication) {
-        return ResponseEntity.ok().body(imageService.updateImageById(id, image, userService.createUserAndReturnUserId(authentication)));
+        return ResponseEntity.ok().body(imageService.updateImageById(imageId, image, userService.createUserAndReturnUserId(authentication)));
     }
 
-    @DeleteMapping("/{id}/delete")
+    @DeleteMapping("/{imageId}")
     public ResponseEntity<Image> deleteImageById(
-            @PathVariable String id,
+            @PathVariable String imageId,
             Authentication authentication) {
-        return ResponseEntity.ok().body(imageService.deleteImageById(id, userService.createUserAndReturnUserId(authentication)));
+        return ResponseEntity.ok().body(imageService.deleteImageById(imageId, userService.createUserAndReturnUserId(authentication)));
     }
 }

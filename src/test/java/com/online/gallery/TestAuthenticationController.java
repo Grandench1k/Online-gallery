@@ -37,6 +37,7 @@ public class TestAuthenticationController {
     private ApplicationConfiguration applicationConfiguration;
     @Autowired
     private ConfirmationTokenRepository confirmationTokenRepository;
+    private String jwtToken;
     private String refreshToken;
 
     @Autowired
@@ -54,7 +55,8 @@ public class TestAuthenticationController {
         confirmationTokenRepository.save(confirmationToken);
         user.setEnabled(true);
         userRepository.save(user);
-        refreshToken = jwtService.generateRefreshToken(user);
+        jwtToken = jwtService.generateAccessToken(user);
+        jwtToken = jwtService.generateRefreshToken(user);
     }
 
     @AfterEach
@@ -78,7 +80,7 @@ public class TestAuthenticationController {
                     "password": "password123"
                 }""";
         //When
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/sign-up").content(body).contentType("application/json"));
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/signup").content(body).contentType("application/json"));
         //Then
         response.andExpect(status().isOk());
     }
@@ -92,8 +94,8 @@ public class TestAuthenticationController {
                     "password": "password123"
                 }""";
         //When
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/sign-up").content(body).contentType("application/json"));
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/auth/activate/id"));
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/signup").content(body).contentType("application/json"));
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/auth/signup/" + "id"));
 
         //Then
         response.andExpect(status().isOk());
@@ -108,7 +110,7 @@ public class TestAuthenticationController {
                     "password": "example"
                 }""";
         //When
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/sign-in").content(body).contentType("application/json"));
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/signin").content(body).contentType("application/json"));
         //Then
         response.andExpect(status().isOk());
     }
@@ -116,7 +118,7 @@ public class TestAuthenticationController {
     @Test
     void refreshToken() throws Exception {
         //When
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/refresh").header("Authorization", "Bearer " + refreshToken));
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/refresh").header("Authorization", "Bearer " + jwtToken));
         //Then
         response.andExpect(status().isOk());
     }
@@ -128,7 +130,7 @@ public class TestAuthenticationController {
                     "email": "exapmle@mail.org"
                 }""";
         //When
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/password/forgot").content(body).contentType(MediaType.APPLICATION_JSON));
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/password").content(body).contentType(MediaType.APPLICATION_JSON));
         //Then
         response.andExpect(status().isOk());
     }
@@ -136,15 +138,21 @@ public class TestAuthenticationController {
     @Test
     void resetPassword() throws Exception {
         String id = "id";
-        PasswordResetToken passwordResetToken = new PasswordResetToken(id, "exapmle@mail.org");
+        PasswordResetToken passwordResetToken =
+                new PasswordResetToken(id, "exapmle@mail.org");
         passwordResetTokenRepository.save(passwordResetToken);
         String body = """
                 {
                     "password": "example123"
                 }""";
         //When
-        ResultActions firstResponse = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/auth/password/reset/" + id));
-        ResultActions secondResponse = mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/password/reset/" + id).content(body).contentType(MediaType.APPLICATION_JSON));
+        ResultActions firstResponse =
+                mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/auth/password/" + passwordResetToken.getId()));
+        ResultActions secondResponse =
+                mockMvc.perform(MockMvcRequestBuilders
+                        .post("/api/v1/auth/password/" + passwordResetToken.getId())
+                        .content(body)
+                        .contentType(MediaType.APPLICATION_JSON));
         //Then
         firstResponse.andExpect(status().isOk());
         secondResponse.andExpect(status().isOk());

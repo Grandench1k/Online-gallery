@@ -14,7 +14,6 @@ import java.io.Serializable;
 
 @Getter
 @Setter
-@Builder
 @Document(collection = "videos")
 public class Video implements Serializable {
     @Id
@@ -28,4 +27,11 @@ public class Video implements Serializable {
     private String uri;
     @Hidden
     private String userId;
+
+    public Video(String id, String name, String uri, String userId) {
+        this.id = id;
+        this.name = name;
+        this.uri = uri;
+        this.userId = userId;
+    }
 }

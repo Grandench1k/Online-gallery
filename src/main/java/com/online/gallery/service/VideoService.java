@@ -11,11 +11,11 @@ public interface VideoService {
 
     List<Video> findAllVideos(String userId);
 
-    byte[] findVideoById(String id, String userId);
+    byte[] findVideoById(String videoId, String userId);
 
     Video saveVideo(Video videoToSave, MultipartFile videoFile, String userId) throws IOException;
 
-    Video updateVideoById(String id, Video video, String userId);
+    Video updateVideoById(String videoId, Video video, String userId);
 
-    Video deleteVideoById(String id, String userId);
+    Video deleteVideoById(String videoId, String userId);
 }

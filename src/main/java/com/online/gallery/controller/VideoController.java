@@ -29,7 +29,7 @@ public interface VideoController {
             responses = {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "video/mp4")),
                     @ApiResponse(responseCode = "404", description = "Video with this id not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotFoundResponse.class)))})
-    ResponseEntity<byte[]> findVideoById(String id, Authentication authentication);
+    ResponseEntity<byte[]> findVideoById(String videoId, Authentication authentication);
 
     @Operation(summary = "POST video", description = "POST video by userId",
             responses = {
@@ -43,11 +43,11 @@ public interface VideoController {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Video.class))),
                     @ApiResponse(responseCode = "404", description = "Video with this id not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotFoundResponse.class))),
                     @ApiResponse(responseCode = "409", description = "Video with this name is already defined.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class)))})
-    ResponseEntity<Video> updateVideoById(String id, Video video, Authentication authentication);
+    ResponseEntity<Video> updateVideoById(String videoId, Video video, Authentication authentication);
 
     @Operation(summary = "DELETE video by Id", description = "DELETE video by Id and UserId",
             responses = {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Video.class))),
                     @ApiResponse(responseCode = "404", description = "Videos not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = NotFoundResponse.class)))})
-    ResponseEntity<Video> deleteVideoById(String id, Authentication authentication);
+    ResponseEntity<Video> deleteVideoById(String videoId, Authentication authentication);
 }

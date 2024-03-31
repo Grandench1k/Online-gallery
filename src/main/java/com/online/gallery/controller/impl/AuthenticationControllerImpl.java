@@ -12,6 +12,7 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,19 +27,26 @@ public class AuthenticationControllerImpl implements AuthenticationController {
         this.service = service;
     }
 
-    @PostMapping("/sign-up")
+    @PostMapping("/signup")
     public ResponseEntity<AuthenticationResponse> signUp(@RequestBody @Validated RegisterRequest request) throws MessagingException {
         return ResponseEntity.ok(service.register(request));
     }
 
-    @GetMapping("activate/{token}")
+    @GetMapping("/signup/{token}")
     public ResponseEntity<OkResponse> activateUser(@PathVariable String token) {
         return ResponseEntity.ok(new OkResponse(service.activate(token)));
     }
 
-    @PostMapping("/sign-in")
+    @PostMapping("/signin")
     public ResponseEntity<AuthenticationResponse> signIn(@RequestBody @Validated AuthenticationRequest request) {
         return ResponseEntity.ok(service.authenticate(request));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<OkResponse> logOut() {
+        SecurityContextHolder.clearContext();
+        return ResponseEntity
+                .ok(new OkResponse("successful logout"));
     }
 
     @PostMapping("/refresh")
@@ -48,17 +56,17 @@ public class AuthenticationControllerImpl implements AuthenticationController {
         service.refreshToken(request, response);
     }
 
-    @PostMapping("password/forgot")
+    @PostMapping("password")
     public ResponseEntity<OkResponse> forgotPassword(@RequestBody @Validated PasswordResetRequest passwordResetRequest) throws MessagingException {
         return ResponseEntity.ok(new OkResponse(service.sendMessageForReset(passwordResetRequest.getEmail())));
     }
 
-    @GetMapping("password/reset/{token}")
+    @GetMapping("password/{token}")
     public ResponseEntity<OkResponse> confirmPasswordResetPage(@PathVariable String token) {
         return ResponseEntity.ok(new OkResponse(service.checkPasswordResetTokenAndUser(token)));
     }
 
-    @PostMapping("password/reset/{token}")
+    @PostMapping("password/{token}")
     public ResponseEntity<OkResponse> confirmPasswordReset(
             @PathVariable String token,
             @RequestBody @Validated PasswordResetConfirmationRequest passwordResetConfirmationRequest) {
