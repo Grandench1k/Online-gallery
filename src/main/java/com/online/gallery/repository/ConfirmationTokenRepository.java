@@ -1,6 +1,6 @@
 package com.online.gallery.repository;
 
-import com.online.gallery.model.ConfirmationToken;
+import com.online.gallery.model.auth.ConfirmationToken;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

@@ -1,6 +1,6 @@
 package com.online.gallery.repository;
 
-import com.online.gallery.model.User;
+import com.online.gallery.model.user.User;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

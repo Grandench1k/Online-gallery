@@ -1,15 +1,15 @@
 package com.online.gallery;
 
 
-import com.online.gallery.model.ConfirmationToken;
-import com.online.gallery.model.PasswordResetToken;
-import com.online.gallery.model.Role;
-import com.online.gallery.model.User;
+import com.online.gallery.model.auth.ConfirmationToken;
+import com.online.gallery.model.auth.PasswordResetToken;
+import com.online.gallery.model.user.Role;
+import com.online.gallery.model.user.User;
 import com.online.gallery.repository.ConfirmationTokenRepository;
 import com.online.gallery.repository.PasswordResetTokenRepository;
 import com.online.gallery.repository.UserRepository;
-import com.online.gallery.security.ApplicationConfiguration;
-import com.online.gallery.security.JwtService;
+import com.online.gallery.security.configuration.ApplicationConfiguration;
+import com.online.gallery.security.service.JwtService;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;

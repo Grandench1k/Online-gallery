@@ -1,6 +1,6 @@
 package com.online.gallery.exception;
 
-import com.online.gallery.controller.UserController;
+import com.online.gallery.controller.user.UserController;
 import com.online.gallery.dto.response.BadRequestResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

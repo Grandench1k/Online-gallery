@@ -1,7 +1,7 @@
 package com.online.gallery.repository;
 
 
-import com.online.gallery.model.Video;
+import com.online.gallery.model.media.Video;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 

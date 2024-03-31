@@ -1,6 +1,6 @@
 package com.online.gallery.exception;
 
-import com.online.gallery.controller.VideoController;
+import com.online.gallery.controller.video.VideoController;
 import com.online.gallery.dto.response.BadRequestResponse;
 import com.online.gallery.dto.response.NotFoundResponse;
 import org.springframework.http.HttpStatus;

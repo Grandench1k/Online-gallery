@@ -1,13 +1,13 @@
 package com.online.gallery;
 
-import com.online.gallery.model.Role;
-import com.online.gallery.model.User;
-import com.online.gallery.model.Video;
+import com.online.gallery.model.user.Role;
+import com.online.gallery.model.user.User;
+import com.online.gallery.model.media.Video;
 import com.online.gallery.repository.UserRepository;
 import com.online.gallery.repository.VideoRepository;
-import com.online.gallery.security.ApplicationConfiguration;
-import com.online.gallery.security.JwtService;
-import com.online.gallery.storage.s3.S3service;
+import com.online.gallery.security.configuration.ApplicationConfiguration;
+import com.online.gallery.security.service.JwtService;
+import com.online.gallery.storage.s3.service.S3service;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,7 +1,7 @@
 package com.online.gallery.repository;
 
 
-import com.online.gallery.model.Image;
+import com.online.gallery.model.media.Image;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
