@@ -1,9 +1,15 @@
-FROM maven:latest
+FROM maven:3.9.6 AS build
+WORKDIR /app
+COPY pom.xml .
 
-MAINTAINER Grandench1k
+RUN mvn dependency:go-offline
 
-COPY . .
-
+COPY src src
 RUN mvn clean package -DskipTests
 
-ENTRYPOINT ["java", "-jar", "target/online-gallery-0.0.1-SNAPSHOT.jar"]
+FROM openjdk:21
+WORKDIR /app
+
+COPY --from=build /app/target/gallery-1.0.0.jar /app
+
+ENTRYPOINT ["java", "-jar", "gallery-1.0.0.jar"]

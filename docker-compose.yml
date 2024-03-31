@@ -1,38 +1,61 @@
-version: '1'
+version: '3.8'
 
 services:
   app:
     container_name: app
     build:
       dockerfile: Dockerfile
-    links:
-      - cache
-      - mongo
-    ports:
-      - 8080:8080
     depends_on:
-      - mongo
-      - cache
+      mongo:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
     environment:
-      - REDIS_HOST=cache
-      - REDIS_PORT=6379
-      - MONGODB_HOST=mongo
-      - MONGODB_PORT=27017
-      ##aws access key id
-      - AWS_ACCESS_KEY_ID=
-      ##aws secret access key
-      - AWS_SECRET_ACCESS_KEY=
+      REDIS_HOST: cache
+      REDIS_PORT: 6379
+      MONGODB_HOST: mongo
+      MONGODB_PORT: 27017
+      AWS_ACCESS_KEY_ID:
+      AWS_SECRET_ACCESS_KEY:
+      AWS_REGION:
+    networks:
+      - app-network
+
   mongo:
-    image: mongo:latest
+    image: mongo:7
     container_name: mongo
     restart: always
-    ports:
-      - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD","mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   cache:
     container_name: cache
-    image: redis:latest
-    ports:
-      - 6379:6379
+    image: redis:7.0-alpine
     restart: always
-    environment:
-      - ALLOW_EMPTY_PASSWORD=yes
+    command: redis-server
+    volumes:
+      - redis-data:/data
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  mongo-data:
+  redis-data:
