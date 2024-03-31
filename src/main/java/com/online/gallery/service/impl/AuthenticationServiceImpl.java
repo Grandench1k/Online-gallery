@@ -4,6 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.online.gallery.dto.request.AuthenticationRequest;
 import com.online.gallery.dto.request.RegisterRequest;
 import com.online.gallery.dto.response.AuthenticationResponse;
+import com.online.gallery.exception.*;
+import com.online.gallery.mail.EmailMessageBuilder;
+import com.online.gallery.mail.impl.MailSenderImpl;
+import com.online.gallery.model.ConfirmationToken;
+import com.online.gallery.model.PasswordResetToken;
+import com.online.gallery.model.Role;
+import com.online.gallery.model.User;
+import com.online.gallery.repository.ConfirmationTokenRepository;
+import com.online.gallery.repository.PasswordResetTokenRepository;
+import com.online.gallery.repository.UserRepository;
+import com.online.gallery.security.JwtService;
+import com.online.gallery.service.AuthenticationService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,18 +27,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import com.online.gallery.exception.*;
-import com.online.gallery.mail.EmailMessageBuilder;
-import com.online.gallery.mail.impl.MailSenderImpl;
-import com.online.gallery.repository.ConfirmationTokenRepository;
-import com.online.gallery.repository.PasswordResetTokenRepository;
-import com.online.gallery.repository.UserRepository;
-import com.online.gallery.security.JwtService;
-import com.online.gallery.service.AuthenticationService;
-import com.online.gallery.model.ConfirmationToken;
-import com.online.gallery.model.PasswordResetToken;
-import com.online.gallery.model.Role;
-import com.online.gallery.model.User;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -43,16 +43,16 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
 
-    public AuthenticationResponse register(RegisterRequest request) throws UserAlreadyDefined, MessagingException {
+    public AuthenticationResponse register(RegisterRequest request) throws UserDuplicationException, MessagingException {
         String email = request.getEmail();
         Optional<User> optionalUser = userRepository.findByEmail(email);
         if (optionalUser.isPresent()) {
             User userFromDatabase = optionalUser.get();
             if (userFromDatabase.isEnabled()) {
-                throw new UserAlreadyDefined("this user already exist.");
+                throw new UserDuplicationException("this user already exist.");
             }
             if (userFromDatabase.isAccountNonExpired()) {
-                throw new UserAlreadyDefined("this user already exist, but not registered with email. Try again in 15 minutes.");
+                throw new UserDuplicationException("this user already exist, but not registered with email. Try again in 15 minutes.");
             }
             userRepository.delete(userFromDatabase);
             return register(request);
@@ -80,7 +80,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public AuthenticationResponse authenticate(AuthenticationRequest request) throws UsernameNotFoundException {
         String email = request.getEmail();
         var user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFound("user not found."));
+                .orElseThrow(() -> new UserNotFoundException("user not found."));
         user.checkIfUserEnabled();
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(email, request.getPassword()));
@@ -91,12 +91,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public String activate(String token) {
         ConfirmationToken confirmationToken = confirmationTokenRepository.findById(token)
-                .orElseThrow(() -> new ConfirmationTokenNotFound("confirmation token not found."));
+                .orElseThrow(() -> new TokenNotFoundException("confirmation token not found."));
         confirmationTokenRepository.deleteById(confirmationToken.getId());
         User unverifiedUser = userRepository.findById(confirmationToken.getUserId())
-                .orElseThrow(() -> new UserNotFound("user not found."));
+                .orElseThrow(() -> new UserNotFoundException("user not found."));
         if (confirmationToken.getExpiredAt().isBefore(LocalDateTime.now())) {
-            throw new ConfirmationTokenExpired("confirmation token is expired.");
+            throw new TokenExpirationException("confirmation token is expired.");
         }
         unverifiedUser.setEnabled(true);
         userRepository.save(unverifiedUser);
@@ -105,13 +105,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public String sendMessageForReset(String email) throws MessagingException {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UserNotFound("user not found."));
+                .orElseThrow(() -> new UserNotFoundException("user not found."));
         user.checkIfUserEnabled();
         Optional<PasswordResetToken> optionalPasswordResetToken = passwordResetTokenRepository.findByEmail(email);
         if (optionalPasswordResetToken.isPresent()) {
             PasswordResetToken passwordResetToken = optionalPasswordResetToken.get();
             if (passwordResetToken.getExpiredAt().isAfter(LocalDateTime.now())) {
-                throw new PasswordResetTokenAlreadyDefined("the password recovery link was sent. Try again in 15 minutes.");
+                throw new TokenDuplicationException("the password recovery link was sent. Try again in 15 minutes.");
             }
             passwordResetTokenRepository.deleteById(passwordResetToken.getId());
             sendMessageForReset(email);
@@ -127,25 +127,26 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public String checkPasswordResetTokenAndUser(String token) {
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findById(token)
-                .orElseThrow(() -> new ConfirmationTokenNotFound("password reset token not found."));
+                .orElseThrow(() -> new TokenNotFoundException("password reset token not found."));
         if (!userRepository.existsByEmail(passwordResetToken.getEmail())) {
-            throw new UserNotFound("user not found.");
+            throw new UserNotFoundException("user not found.");
         }
         if (passwordResetToken.getExpiredAt().isBefore(LocalDateTime.now())) {
-            throw new ConfirmationTokenExpired("password reset token is expired.");
+            throw new TokenExpirationException("password reset token is expired.");
         }
         return "enter a new password.";
     }
+
     public String resetPassword(String token, String newPassword) {
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findById(token)
-                .orElseThrow(() -> new ConfirmationTokenNotFound("password reset token not found."));
+                .orElseThrow(() -> new TokenNotFoundException("password reset token not found."));
         User user = userRepository.findByEmail(passwordResetToken.getEmail())
-                .orElseThrow(() -> new UserNotFound("user not found."));
+                .orElseThrow(() -> new UserNotFoundException("user not found."));
         if (passwordResetToken.getExpiredAt().isBefore(LocalDateTime.now())) {
-            throw new ConfirmationTokenExpired("password reset token is expired.");
+            throw new TokenExpirationException("password reset token is expired.");
         }
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
-            throw new PasswordsMatch("passwords match.");
+            throw new PasswordsMatchException("passwords match.");
         }
         passwordResetTokenRepository.deleteById(token);
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -156,7 +157,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
-        final String userEmail ;
+        final String userEmail;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return;
         }
@@ -164,15 +165,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
             var user = this.userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new UserNotFound("user not found."));
+                    .orElseThrow(() -> new UserNotFoundException("user not found."));
             if (jwtService.isTokenValid(refreshToken, user)) {
-            var accessToken = jwtService.generateAccessToken(user);
-            var authResponse = AuthenticationResponse.builder()
-                    .accessToken(accessToken)
-                    .refreshToken(refreshToken)
-                    .build();
-            new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+                var accessToken = jwtService.generateAccessToken(user);
+                var authResponse = AuthenticationResponse.builder()
+                        .accessToken(accessToken)
+                        .refreshToken(refreshToken)
+                        .build();
+                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
             }
+        }
     }
-}
 }

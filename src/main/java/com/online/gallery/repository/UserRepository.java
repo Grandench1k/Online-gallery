@@ -1,7 +1,7 @@
 package com.online.gallery.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
 import com.online.gallery.model.User;
+import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 

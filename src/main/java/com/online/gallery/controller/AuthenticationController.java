@@ -3,6 +3,8 @@ package com.online.gallery.controller;
 import com.online.gallery.dto.request.AuthenticationRequest;
 import com.online.gallery.dto.request.PasswordResetRequest;
 import com.online.gallery.dto.request.RegisterRequest;
+import com.online.gallery.dto.response.*;
+import com.online.gallery.model.PasswordResetConfirmationRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,8 +14,6 @@ import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.ResponseEntity;
-import com.online.gallery.dto.response.*;
-import com.online.gallery.model.PasswordResetConfirmationRequest;
 
 import java.io.IOException;
 
@@ -63,8 +63,8 @@ public interface AuthenticationController {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OkResponse.class))),
                     @ApiResponse(responseCode = "400", description = "please confirm your registration with email.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class))),
                     @ApiResponse(responseCode = "400", description = "password reset token is expired.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "user not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OtherExceptionsResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "password reset token not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OtherExceptionsResponse.class)))})
+                    @ApiResponse(responseCode = "404", description = "user not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DefaultExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "password reset token not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DefaultExceptionResponse.class)))})
     ResponseEntity<OkResponse> confirmPasswordResetPage(String token);
 
     @Operation(summary = "password reset", description = "reset user's password",
@@ -72,8 +72,8 @@ public interface AuthenticationController {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = PasswordResetConfirmationRequest.class))),
                     @ApiResponse(responseCode = "400", description = "please confirm your registration with email.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class))),
                     @ApiResponse(responseCode = "400", description = "password reset token is expired.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "user not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OtherExceptionsResponse.class))),
-                    @ApiResponse(responseCode = "404", description = "password reset token not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OtherExceptionsResponse.class)))})
+                    @ApiResponse(responseCode = "404", description = "user not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DefaultExceptionResponse.class))),
+                    @ApiResponse(responseCode = "404", description = "password reset token not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DefaultExceptionResponse.class)))})
     ResponseEntity<OkResponse> confirmPasswordReset(
             String token,
             PasswordResetConfirmationRequest passwordResetConfirmationRequest);

@@ -2,7 +2,6 @@ package com.online.gallery.storage.s3.impl;
 
 import com.online.gallery.storage.s3.S3service;
 import lombok.RequiredArgsConstructor;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.core.ResponseInputStream;
 import software.amazon.awssdk.core.sync.RequestBody;

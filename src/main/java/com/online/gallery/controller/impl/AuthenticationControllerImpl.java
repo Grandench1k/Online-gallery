@@ -1,9 +1,13 @@
 package com.online.gallery.controller.impl;
 
+import com.online.gallery.controller.AuthenticationController;
 import com.online.gallery.dto.request.AuthenticationRequest;
 import com.online.gallery.dto.request.PasswordResetRequest;
 import com.online.gallery.dto.request.RegisterRequest;
 import com.online.gallery.dto.response.AuthenticationResponse;
+import com.online.gallery.dto.response.OkResponse;
+import com.online.gallery.model.PasswordResetConfirmationRequest;
+import com.online.gallery.service.AuthenticationService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -11,10 +15,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import com.online.gallery.controller.AuthenticationController;
-import com.online.gallery.dto.response.OkResponse;
-import com.online.gallery.service.AuthenticationService;
-import com.online.gallery.model.PasswordResetConfirmationRequest;
 
 import java.io.IOException;
 

@@ -1,5 +1,9 @@
 package com.online.gallery.controller.impl;
 
+import com.online.gallery.controller.ImageController;
+import com.online.gallery.model.Image;
+import com.online.gallery.service.ImageService;
+import com.online.gallery.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -7,10 +11,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.controller.ImageController;
-import com.online.gallery.model.Image;
-import com.online.gallery.service.ImageService;
-import com.online.gallery.service.UserService;
 
 import java.io.IOException;
 import java.util.List;

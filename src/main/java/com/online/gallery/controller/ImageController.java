@@ -1,5 +1,9 @@
 package com.online.gallery.controller;
 
+import com.online.gallery.dto.response.BadRequestResponse;
+import com.online.gallery.dto.response.NotFoundResponse;
+import com.online.gallery.dto.response.DefaultExceptionResponse;
+import com.online.gallery.model.Image;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,10 +15,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.model.Image;
-import com.online.gallery.dto.response.BadRequestResponse;
-import com.online.gallery.dto.response.NotFoundResponse;
-import com.online.gallery.dto.response.OtherExceptionsResponse;
 
 import java.io.IOException;
 import java.util.List;
@@ -51,6 +51,6 @@ public interface ImageController {
     @Operation(summary = "DELETE image by Id", description = "DELETE image by Id and UserId",
             responses = {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = Image.class))),
-                    @ApiResponse(responseCode = "404", description = "Images not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OtherExceptionsResponse.class)))})
+                    @ApiResponse(responseCode = "404", description = "Images not found.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = DefaultExceptionResponse.class)))})
     ResponseEntity<Image> deleteImageById(@PathVariable String id, Authentication authentication);
 }

@@ -1,8 +1,8 @@
 package com.online.gallery.service;
 
+import com.online.gallery.model.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.model.User;
 
 import java.io.IOException;
 

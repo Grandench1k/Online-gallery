@@ -1,5 +1,12 @@
 package com.online.gallery.service.impl;
 
+import com.online.gallery.exception.ImageDuplicationException;
+import com.online.gallery.exception.ImageNotFoundException;
+import com.online.gallery.exception.InvalidFileFormatException;
+import com.online.gallery.model.Image;
+import com.online.gallery.repository.ImageRepository;
+import com.online.gallery.service.ImageService;
+import com.online.gallery.storage.s3.S3service;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,13 +15,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.model.Image;
-import com.online.gallery.exception.ImageAlreadyDefined;
-import com.online.gallery.exception.ImageNotFound;
-import com.online.gallery.exception.IncorrectFileFormat;
-import com.online.gallery.repository.ImageRepository;
-import com.online.gallery.storage.s3.S3service;
-import com.online.gallery.service.ImageService;
 
 import java.io.IOException;
 import java.util.List;
@@ -35,7 +35,7 @@ public class ImageServiceImpl implements ImageService {
     public List<Image> findAllImages(String userId) {
         List<Image> allImages = imageRepository.findAllByUserId(userId);
         if (allImages.isEmpty()) {
-            throw new ImageNotFound("images not found.");
+            throw new ImageNotFoundException("images not found.");
         }
         return allImages;
     }
@@ -43,14 +43,14 @@ public class ImageServiceImpl implements ImageService {
     @Cacheable(cacheNames = "imageCache", key = "#id")
     public byte[] findImageById(String id, String userId) {
         Image image = imageRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ImageNotFound("image with this id not found."));
+                .orElseThrow(() -> new ImageNotFoundException("image with this id not found."));
         return s3service.getObject(bucketName, generateLinkWithUserIdForS3Images(userId) + image.getUri());
     }
 
     @CachePut(cacheNames = "imageCache")
     public Image saveImage(MultipartFile imageFile, Image image, String userId) throws IOException {
         if (imageRepository.findByNameAndUserId(image.getName(), userId).isPresent()) {
-            throw new ImageAlreadyDefined("image with this name is already defined.");
+            throw new ImageDuplicationException("image with this name is already defined.");
         }
         String fileFormat = checkAndGetFileFormat(imageFile);
         String id = new ObjectId().toString();
@@ -73,7 +73,7 @@ public class ImageServiceImpl implements ImageService {
                 && !fileFormat.contentEquals(".jpeg")
                 && !fileFormat.contentEquals(".gif")
                 && !fileFormat.contentEquals(".tiff")) {
-            throw new IncorrectFileFormat("incorrect image format, please send image with .jpg, .jpeg, .png, .webp, .bmp, .gif and .tiff formats.");
+            throw new InvalidFileFormatException("incorrect image format, please send image with .jpg, .jpeg, .png, .webp, .bmp, .gif and .tiff formats.");
         }
         return fileFormat;
     }
@@ -82,10 +82,10 @@ public class ImageServiceImpl implements ImageService {
     @CachePut(cacheNames = "imageCache", key = "#id")
     public Image updateImageById(String id, Image image, String userId) {
         Image imageToUpdate = imageRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ImageNotFound("image with this id not found."));
+                .orElseThrow(() -> new ImageNotFoundException("image with this id not found."));
         String imageName = image.getName();
         if (imageRepository.findByNameAndUserId(imageName, userId).isPresent()) {
-            throw new ImageAlreadyDefined("image with this name is already defined.");
+            throw new ImageDuplicationException("image with this name is already defined.");
         }
         imageToUpdate.setName(imageName);
         imageRepository.save(imageToUpdate);
@@ -95,7 +95,7 @@ public class ImageServiceImpl implements ImageService {
     @CacheEvict(cacheNames = "imageCache", key = "#id")
     public Image deleteImageById(String id, String userId) {
         Image imageToDelete = imageRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new ImageNotFound("image with this id not found."));
+                .orElseThrow(() -> new ImageNotFoundException("image with this id not found."));
         s3service.deleteObject(bucketName, "images/" + imageToDelete.getUri());
         imageRepository.delete(imageToDelete);
         return imageToDelete;

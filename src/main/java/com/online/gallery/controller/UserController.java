@@ -1,5 +1,9 @@
 package com.online.gallery.controller;
 
+import com.online.gallery.dto.request.PasswordUpdateRequest;
+import com.online.gallery.dto.response.BadRequestResponse;
+import com.online.gallery.dto.response.NotFoundResponse;
+import com.online.gallery.dto.response.OkResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,10 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.dto.request.PasswordUpdateRequest;
-import com.online.gallery.dto.response.BadRequestResponse;
-import com.online.gallery.dto.response.NotFoundResponse;
-import com.online.gallery.dto.response.OkResponse;
 
 import java.io.IOException;
 
@@ -42,6 +42,6 @@ public interface UserController {
             responses = {
                     @ApiResponse(responseCode = "200", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OkResponse.class))),
                     @ApiResponse(responseCode = "400", description = "Invalid old password", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class))),
-                    @ApiResponse(responseCode = "400", description =  "passwords match.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class)))})
+                    @ApiResponse(responseCode = "400", description = "passwords match.", content = @Content(mediaType = "application/json", schema = @Schema(implementation = BadRequestResponse.class)))})
     ResponseEntity<OkResponse> updateUserPassword(PasswordUpdateRequest passwordUpdateRequest, Authentication authentication);
 }

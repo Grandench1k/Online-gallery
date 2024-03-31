@@ -18,15 +18,15 @@ import java.util.LinkedHashMap;
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-            String time = ZonedDateTime.now(ZoneId.of("Z")).toString();
-            LinkedHashMap<String, Object> responseBody = new LinkedHashMap<>();
-            responseBody.put("timestamp", time);
-            responseBody.put("status", HttpStatus.UNAUTHORIZED.value());
-            responseBody.put("message", authException.getMessage() + ".");
-            ObjectMapper objectMapper = new ObjectMapper();
-            String jsonBody = objectMapper.writeValueAsString(responseBody);
-            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
-            response.getWriter().write(jsonBody);
+        String time = ZonedDateTime.now(ZoneId.of("Z")).toString();
+        LinkedHashMap<String, Object> responseBody = new LinkedHashMap<>();
+        responseBody.put("timestamp", time);
+        responseBody.put("status", HttpStatus.UNAUTHORIZED.value());
+        responseBody.put("message", authException.getMessage() + ".");
+        ObjectMapper objectMapper = new ObjectMapper();
+        String jsonBody = objectMapper.writeValueAsString(responseBody);
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.getWriter().write(jsonBody);
     }
 }

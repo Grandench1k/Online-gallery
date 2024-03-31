@@ -1,5 +1,12 @@
 package com.online.gallery.service.impl;
 
+import com.online.gallery.exception.InvalidFileFormatException;
+import com.online.gallery.exception.VideoDuplicationException;
+import com.online.gallery.exception.VideoNotFoundException;
+import com.online.gallery.model.Video;
+import com.online.gallery.repository.VideoRepository;
+import com.online.gallery.service.VideoService;
+import com.online.gallery.storage.s3.S3service;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,14 +15,6 @@ import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.model.Video;
-import com.online.gallery.exception.ImageAlreadyDefined;
-import com.online.gallery.exception.IncorrectFileFormat;
-import com.online.gallery.exception.VideoAlreadyDefined;
-import com.online.gallery.exception.VideoNotFound;
-import com.online.gallery.repository.VideoRepository;
-import com.online.gallery.storage.s3.S3service;
-import com.online.gallery.service.VideoService;
 
 import java.io.IOException;
 import java.util.List;
@@ -36,7 +35,7 @@ public class VideoServiceImpl implements VideoService {
     public List<Video> findAllVideos(String userId) {
         List<Video> allVideos = videoRepository.findAllByUserId(userId);
         if (allVideos.isEmpty()) {
-            throw new VideoNotFound("videos not found.");
+            throw new VideoNotFoundException("videos not found.");
         }
         return allVideos;
     }
@@ -44,7 +43,7 @@ public class VideoServiceImpl implements VideoService {
     @Cacheable(cacheNames = "videoCache", key = "#id")
     public byte[] findVideoById(String id, String userId) {
         Video video = videoRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new VideoNotFound("video with this id Not Found."));
+                .orElseThrow(() -> new VideoNotFoundException("video with this id Not Found."));
         return s3service.getObject(bucketName, generateLinkWithUserIdForS3Videos(userId) + video.getUri());
     }
 
@@ -52,7 +51,7 @@ public class VideoServiceImpl implements VideoService {
     @CachePut(cacheNames = "videoCache")
     public Video saveVideo(Video videoToSave, MultipartFile videoFile, String userId) throws IOException {
         if (videoRepository.findByNameAndUserId(videoToSave.getName(), userId).isPresent()) {
-            throw new VideoAlreadyDefined("video with this name is already defined.");
+            throw new VideoDuplicationException("video with this name is already defined.");
         }
         String fileFormat = checkAndGetFileFormat(videoFile);
         String id = new ObjectId().toString();
@@ -72,7 +71,7 @@ public class VideoServiceImpl implements VideoService {
                 && !fileFormat.contentEquals(".mpeg")
                 && !fileFormat.contentEquals(".ogg")
         ) {
-            throw new IncorrectFileFormat("incorrect video format, please send video with .mp4, .mpeg and .ogg formats.");
+            throw new InvalidFileFormatException("incorrect video format, please send video with .mp4, .mpeg and .ogg formats.");
         }
         return fileFormat;
     }
@@ -80,20 +79,20 @@ public class VideoServiceImpl implements VideoService {
     @CachePut(cacheNames = "videoCache")
     public Video updateVideoById(String id, Video video, String userId) {
         Video videoToUpdate = videoRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new VideoNotFound("video with this id not found."));
+                .orElseThrow(() -> new VideoNotFoundException("video with this id not found."));
         String videoName = video.getName();
         if (videoRepository.findByNameAndUserId(videoName, userId).isPresent()) {
-            throw new ImageAlreadyDefined("video with this name is already defined.");
+            throw new VideoDuplicationException("video with this name is already defined.");
         }
         videoToUpdate.setName(videoName);
         videoRepository.save(videoToUpdate);
         return videoToUpdate;
     }
 
-    @CacheEvict(cacheNames = "videoCache", key = "#id" )
+    @CacheEvict(cacheNames = "videoCache", key = "#id")
     public Video deleteVideoById(String id, String userId) {
         Video videoToDelete = videoRepository.findByIdAndUserId(id, userId)
-                .orElseThrow(() -> new VideoNotFound("video with this id not found."));
+                .orElseThrow(() -> new VideoNotFoundException("video with this id not found."));
         s3service.deleteObject(bucketName, videoToDelete.getUri());
         videoRepository.delete(videoToDelete);
         return videoToDelete;

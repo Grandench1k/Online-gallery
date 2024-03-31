@@ -1,5 +1,10 @@
 package com.online.gallery.service.impl;
 
+import com.online.gallery.exception.*;
+import com.online.gallery.model.User;
+import com.online.gallery.repository.UserRepository;
+import com.online.gallery.service.UserService;
+import com.online.gallery.storage.s3.S3service;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
@@ -7,11 +12,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.exception.*;
-import com.online.gallery.model.User;
-import com.online.gallery.repository.UserRepository;
-import com.online.gallery.storage.s3.S3service;
-import com.online.gallery.service.UserService;
 
 import java.io.IOException;
 import java.util.Objects;
@@ -33,7 +33,7 @@ public class UserServiceImpl implements UserService {
         User user = (User) authentication.getPrincipal();
         String userId = user.getId();
         if (!userRepository.existsById(userId)) {
-            throw new UserNotFound("user not found.");
+            throw new UserNotFoundException("user not found.");
         }
         user.checkIfUserEnabled();
         return userId;
@@ -42,7 +42,7 @@ public class UserServiceImpl implements UserService {
     public User createUser(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         if (!userRepository.existsById(user.getId())) {
-            throw new UserNotFound("user not found.");
+            throw new UserNotFoundException("user not found.");
         }
         user.checkIfUserEnabled();
         return user;
@@ -51,7 +51,7 @@ public class UserServiceImpl implements UserService {
     public byte[] getProfileImage(User user) {
         String profileImageId = user.getProfileImageId();
         if (profileImageId == null) {
-            throw new UserImageNotFound("not found any profile images.");
+            throw new ImageNotFoundException("not found any profile images.");
         } else {
             return s3service.getObject(bucketName, generateLinkWithUserIdForS3ProfileImages(user.getId()) + profileImageId);
         }
@@ -64,7 +64,7 @@ public class UserServiceImpl implements UserService {
                 && !fileFormat.contentEquals(".png")
                 && !fileFormat.contentEquals(".webp")
                 && !fileFormat.contentEquals(".jpeg")) {
-            throw new IncorrectFileFormat("incorrect photo format, please send photo with .jpg, .png, .webp and .jpeg formats.");
+            throw new InvalidFilenameException("incorrect photo format, please send photo with .jpg, .png, .webp and .jpeg formats.");
         }
         String id = new ObjectId().toString();
         s3service.putObject(bucketName, generateLinkWithUserIdForS3ProfileImages(user.getId()) + id, profileImageFile.getBytes());
@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
     public String updateProfileImage(MultipartFile profileImageFile, User user) throws IOException {
         String profileImageId = user.getProfileImageId();
         if (profileImageId == null) {
-            throw new UserImageNotFound("not found any profile images.");
+            throw new ImageNotFoundException("not found any profile images.");
         }
         String id = new ObjectId().toString();
         String userId = user.getId();
@@ -86,12 +86,13 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
         return "profile image updated.";
     }
+
     public String updateUserPassword(String oldPassword, String newPassword, User user) {
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new InvalidPassword("Invalid old password.");
+            throw new WrongPasswordException("Invalid old password.");
         }
         if (newPassword.contentEquals(oldPassword)) {
-            throw new PasswordsMatch("passwords match.");
+            throw new PasswordsMatchException("passwords match.");
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);

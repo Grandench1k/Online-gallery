@@ -27,9 +27,9 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(
                         authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
                                 .requestMatchers("/api/v1/auth/**",
-                                "/online-gallery-docs/**",
-                                "/swagger-ui.html",
-                                "/swagger-ui/**")
+                                        "/online-gallery-docs/**",
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**")
                                 .permitAll()
                                 .anyRequest()
                                 .authenticated())

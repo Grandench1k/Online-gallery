@@ -1,5 +1,6 @@
 package com.online.gallery.model;
 
+import com.online.gallery.exception.UserNotEnabledException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +10,6 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import com.online.gallery.exception.UserNotEnabled;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
@@ -72,7 +72,7 @@ public class User implements UserDetails {
 
     public void checkIfUserEnabled() {
         if (!this.isEnabled()) {
-            throw new UserNotEnabled("please confirm registration with mail.");
+            throw new UserNotEnabledException("please confirm registration with mail.");
         }
     }
 }

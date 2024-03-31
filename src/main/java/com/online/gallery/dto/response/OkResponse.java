@@ -15,7 +15,7 @@ public class OkResponse {
     @Schema(name = "message", example = "ok message", defaultValue = "conflict message")
     String message;
 
-    public  OkResponse (String message) {
+    public OkResponse(String message) {
         this.message = message;
     }
 }
