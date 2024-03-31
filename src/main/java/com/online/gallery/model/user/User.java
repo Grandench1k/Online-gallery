@@ -1,6 +1,6 @@
 package com.online.gallery.model.user;
 
-import com.online.gallery.exception.UserNotEnabledException;
+import com.online.gallery.exception.user.UserNotEnabledException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;

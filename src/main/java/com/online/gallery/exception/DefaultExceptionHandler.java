@@ -1,7 +1,9 @@
 package com.online.gallery.exception;
 
-import com.online.gallery.dto.response.BadRequestResponse;
+import com.online.gallery.dto.response.BadRequestExceptionResponse;
 import com.online.gallery.dto.response.DefaultExceptionResponse;
+import com.online.gallery.exception.auth.TokenNotFoundException;
+import com.online.gallery.exception.file.InvalidFilenameException;
 import jakarta.mail.MessagingException;
 import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
@@ -24,20 +26,20 @@ import java.util.stream.Collectors;
 @RestControllerAdvice
 public class DefaultExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<BadRequestResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
+    public ResponseEntity<BadRequestExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         List<String> errors = e.getBindingResult().getAllErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
-        BadRequestResponse response = new BadRequestResponse(String.join(", ", errors));
+        BadRequestExceptionResponse response = new BadRequestExceptionResponse(String.join(", ", errors));
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
 
     @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<BadRequestResponse> handleNullPointerException() {
-        BadRequestResponse response = new BadRequestResponse("One of the variables is null");
+    public ResponseEntity<BadRequestExceptionResponse> handleNullPointerException() {
+        BadRequestExceptionResponse response = new BadRequestExceptionResponse("One of the variables is null");
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
@@ -56,8 +58,8 @@ public class DefaultExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<BadRequestResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        BadRequestResponse response = new BadRequestResponse(e.getMessage());
+    public ResponseEntity<BadRequestExceptionResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
@@ -79,9 +81,9 @@ public class DefaultExceptionHandler {
     }
 
     @ExceptionHandler(MissingServletRequestPartException.class)
-    public ResponseEntity<BadRequestResponse> handleMissingServletRequestPartException(
+    public ResponseEntity<BadRequestExceptionResponse> handleMissingServletRequestPartException(
             MissingServletRequestPartException e) {
-        BadRequestResponse response = new BadRequestResponse(e.getMessage());
+        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
@@ -100,32 +102,32 @@ public class DefaultExceptionHandler {
     }
 
     @ExceptionHandler(FileSizeLimitExceededException.class)
-    public ResponseEntity<BadRequestResponse> handleFileSizeLimitExceededException() {
-        BadRequestResponse response = new BadRequestResponse("File limit exceeded 20 megabytes");
+    public ResponseEntity<BadRequestExceptionResponse> handleFileSizeLimitExceededException() {
+        BadRequestExceptionResponse response = new BadRequestExceptionResponse("File limit exceeded 20 megabytes");
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
 
     @ExceptionHandler(MessagingException.class)
-    public ResponseEntity<BadRequestResponse> handleMessagingException() {
-        BadRequestResponse response = new BadRequestResponse("Messaging exception");
+    public ResponseEntity<BadRequestExceptionResponse> handleMessagingException() {
+        BadRequestExceptionResponse response = new BadRequestExceptionResponse("Messaging exception");
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
 
     @ExceptionHandler(TokenNotFoundException.class)
-    public ResponseEntity<BadRequestResponse> handleNotFoundConfirmationToken(TokenNotFoundException e) {
-        BadRequestResponse response = new BadRequestResponse(e.getMessage());
+    public ResponseEntity<BadRequestExceptionResponse> handleNotFoundConfirmationToken(TokenNotFoundException e) {
+        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
     }
 
     @ExceptionHandler(InvalidFilenameException.class)
-    public ResponseEntity<BadRequestResponse> handleInvalidFilename(InvalidFilenameException e) {
-        BadRequestResponse response = new BadRequestResponse(e.getMessage());
+    public ResponseEntity<BadRequestExceptionResponse> handleInvalidFilename(InvalidFilenameException e) {
+        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(response);
