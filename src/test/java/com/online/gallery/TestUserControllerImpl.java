@@ -15,7 +15,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -29,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(classes =TestAsyncConfiguration.class)
 public class TestUserControllerImpl {
     @Autowired
     private S3service s3service;
@@ -46,7 +44,7 @@ public class TestUserControllerImpl {
     @Autowired
     private MockMvc mockMvc;
 
-    private String userId = new ObjectId().toString();
+    private final String userId = new ObjectId().toString();
 
     static String fileName = "src/test/resources/static/profileImage.jpg";
 
@@ -118,6 +116,7 @@ public class TestUserControllerImpl {
         //Then
         response.andExpect(status().isOk());
     }
+
     @Test
     public void updatePassword() throws Exception {
         //Given

@@ -19,7 +19,6 @@ import java.io.IOException;
 public class S3serviceImpl implements S3service {
     private final S3Client s3;
 
-    @Async
     public void putObject(String bucketName, String key, byte[] file) {
         PutObjectRequest objectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
@@ -43,7 +42,6 @@ public class S3serviceImpl implements S3service {
         }
     }
 
-    @Async
     public void deleteObject(String bucketName, String key) {
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)

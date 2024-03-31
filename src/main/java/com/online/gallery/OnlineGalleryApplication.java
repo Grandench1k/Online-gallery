@@ -13,7 +13,6 @@ import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication(
         exclude = {RedisRepositoriesAutoConfiguration.class})
 @EnableCaching()
-@EnableAsync(proxyTargetClass = true)
 @OpenAPIDefinition(info = @Info(title = "Online-gallery API", version = "1.0.0", description = "Service for work with online-gallery API"))
 @SecurityScheme(name = "Authorization", scheme = "bearer", bearerFormat = "JWT", type = SecuritySchemeType.HTTP)
 public class OnlineGalleryApplication {

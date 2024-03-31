@@ -16,7 +16,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -30,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ContextConfiguration(classes = TestAsyncConfiguration.class)
 public class TestImageController {
     @Autowired
     private S3service s3service;
@@ -84,6 +82,7 @@ public class TestImageController {
         absolutePath = image.getAbsolutePath();
         System.out.println("created new file in " + absolutePath);
     }
+
     @AfterAll
     static void deleteImage() throws IOException {
         Files.delete(Path.of(absolutePath));
