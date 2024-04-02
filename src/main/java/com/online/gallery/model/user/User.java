@@ -1,6 +1,5 @@
 package com.online.gallery.model.user;
 
-import com.online.gallery.exception.user.UserNotEnabledException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -9,16 +8,17 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import com.online.gallery.exception.user.UserNotEnabledException;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
 
+@Document(collection = "users")
 @Getter
 @Setter
 @Builder
-@Document(collection = "users")
 public class User implements UserDetails {
     @Id
     private String id;
@@ -28,7 +28,22 @@ public class User implements UserDetails {
     private String profileImageId;
     private Role role;
     private boolean enabled;
-    private LocalDateTime expiredAt;
+    private LocalDateTime createdAt;
+
+    public User(String id, String username, String email, String password, String profileImageId, Role role, boolean enabled, LocalDateTime createdAt) {
+        this.id = id;
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        this.profileImageId = profileImageId;
+        this.role = role;
+        this.enabled = enabled;
+        this.createdAt = createdAt;
+    }
+
+    public static UserBuilder builder() {
+        return new UserBuilder();
+    }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -48,7 +63,7 @@ public class User implements UserDetails {
     @Override
     public boolean isAccountNonExpired() {
         if (!this.enabled) {
-            return this.getExpiredAt().isAfter(LocalDateTime.now());
+            return this.getCreatedAt().plusMinutes(15).isAfter(LocalDateTime.now());
         }
         return true;
     }
@@ -72,5 +87,9 @@ public class User implements UserDetails {
         if (!this.isEnabled()) {
             throw new UserNotEnabledException("please confirm registration with mail.");
         }
+    }
+
+    public String toString() {
+        return "User(id=" + this.getId() + ", username=" + this.getUsername() + ", email=" + this.getEmail() + ", password=" + this.getPassword() + ", profileImageId=" + this.getProfileImageId() + ", role=" + this.getRole() + ", enabled=" + this.isEnabled() + ", createdAt=" + this.getCreatedAt() + ")";
     }
 }

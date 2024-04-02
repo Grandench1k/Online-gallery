@@ -1,15 +1,17 @@
 package com.online.gallery.service.user;
 
-import com.online.gallery.model.user.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
+import com.online.gallery.model.user.User;
 
 import java.io.IOException;
 
 public interface UserService {
-    String createUserAndReturnUserId(Authentication authentication);
+    String getUserId(Authentication authentication);
 
-    User createUser(Authentication authentication);
+    User getUser(Authentication authentication);
+
+    String getFileFormat(MultipartFile videoFile);
 
     byte[] getProfileImage(User user);
 

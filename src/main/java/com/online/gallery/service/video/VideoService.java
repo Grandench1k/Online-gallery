@@ -1,7 +1,7 @@
 package com.online.gallery.service.video;
 
-import com.online.gallery.model.media.Video;
 import org.springframework.web.multipart.MultipartFile;
+import com.online.gallery.model.media.Video;
 
 import java.io.IOException;
 import java.util.List;
@@ -12,6 +12,8 @@ public interface VideoService {
     List<Video> findAllVideos(String userId);
 
     byte[] findVideoById(String videoId, String userId);
+
+    String getFileFormat(MultipartFile imageFile);
 
     Video saveVideo(Video videoToSave, MultipartFile videoFile, String userId) throws IOException;
 

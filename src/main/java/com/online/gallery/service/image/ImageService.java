@@ -13,6 +13,8 @@ public interface ImageService {
 
     byte[] findImageById(String imageId, String userId);
 
+    void checkFileFormat(String originalFilename);
+
     Image saveImage(MultipartFile imageFile, Image image, String userId) throws IOException;
 
     Image updateImageById(String imageId, Image image, String userId);

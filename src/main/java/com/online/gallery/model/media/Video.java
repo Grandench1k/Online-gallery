@@ -3,7 +3,6 @@ package com.online.gallery.model.media;
 import io.swagger.v3.oas.annotations.Hidden;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
@@ -19,19 +18,29 @@ public class Video implements Serializable {
     @Id
     @Hidden
     private String id;
-    @Schema(name = "name", example = "name", defaultValue = "name", minLength = 2, maxLength = 20)
+    @Schema(
+            name = "name",
+            example = "name",
+            defaultValue = "name",
+            minLength = 2,
+            maxLength = 20
+    )
     @NotEmpty(message = "Name is empty")
-    @Length(min = 2, max = 20, message = "name of video must contain more than 2 characters and less than 20 characters")
+    @Length(
+            min = 2,
+            max = 20,
+            message = "name of video must contain more than 2 characters and less than 20 characters"
+    )
     private String name;
     @Hidden
-    private String uri;
+    private String url;
     @Hidden
     private String userId;
 
-    public Video(String id, String name, String uri, String userId) {
+    public Video(String id, String name, String url, String userId) {
         this.id = id;
         this.name = name;
-        this.uri = uri;
+        this.url = url;
         this.userId = userId;
     }
 }

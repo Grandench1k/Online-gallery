@@ -1,8 +1,9 @@
 package com.online.gallery.service.image;
 
+import com.online.gallery.exception.file.InvalidFileFormatException;
+import com.online.gallery.exception.file.InvalidFilenameException;
 import com.online.gallery.exception.image.ImageDuplicationException;
 import com.online.gallery.exception.image.ImageNotFoundException;
-import com.online.gallery.exception.file.InvalidFileFormatException;
 import com.online.gallery.model.media.Image;
 import com.online.gallery.repository.ImageRepository;
 import com.online.gallery.storage.s3.service.S3service;
@@ -10,17 +11,20 @@ import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
+@Transactional
 @Service
 public class DefaultImageService implements ImageService {
     private final ImageRepository imageRepository;
     private final S3service s3service;
+
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
 
@@ -33,70 +37,71 @@ public class DefaultImageService implements ImageService {
         return "images/" + userId + "/";
     }
 
+    @Cacheable(cacheNames = "imageCache", key = "'list-' + #userId")
     public List<Image> findAllImages(String userId) {
         List<Image> allImages = imageRepository.findAllByUserId(userId);
         if (allImages.isEmpty()) {
-            throw new ImageNotFoundException("images not found.");
+            throw new ImageNotFoundException("no images found for user: " + userId);
         }
         return allImages;
     }
 
     public byte[] findImageById(String imageId, String userId) {
         Image image = imageRepository.findByIdAndUserId(imageId, userId)
-                .orElseThrow(() -> new ImageNotFoundException("image with this id not found."));
-        return s3service.getObject(bucketName, generateLinkWithUserIdForS3Images(userId) + image.getUri());
+                .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
+        return s3service.getObject(bucketName, generateLinkWithUserIdForS3Images(userId) + image.getUrl());
     }
 
-    @CachePut(cacheNames = "imageCache")
-    public Image saveImage(MultipartFile imageFile, Image image, String userId) throws IOException {
-        if (imageRepository.findByNameAndUserId(image.getName(), userId).isPresent()) {
-            throw new ImageDuplicationException("image with this name is already defined.");
+    public void checkFileFormat(String originalFilename) {
+        if (originalFilename == null || originalFilename.trim().isEmpty()) {
+            throw new InvalidFilenameException("invalid filename");
         }
-        String fileFormat = checkAndGetFileFormat(imageFile);
+        String fileFormat = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+        Set<String> allowedFormats = new HashSet<>(
+                Arrays.asList(".jpg", ".png", ".webp", ".bmp", ".jpeg", ".gif", ".tiff"));
+        if (!allowedFormats.contains(fileFormat)) {
+            throw new InvalidFileFormatException(
+                    "incorrect image format. Please send an image with one" +
+                            " of the following formats: .jpg, .png, .webp, .bmp, .jpeg, .gif, .tiff");
+        }
+    }
+
+    @CachePut(cacheNames = "imageCache", key = "'list-' + #userId")
+    public Image saveImage(MultipartFile imageFile, Image image, String userId) throws IOException {
+        imageRepository.findByNameAndUserId(image.getName(), userId).ifPresent(s -> {
+            throw new ImageDuplicationException("image with this name is already defined for user " + userId);
+        });
+        String originalFilename = imageFile.getOriginalFilename();
+        checkFileFormat(originalFilename);
         String id = new ObjectId().toString();
-        String nameOfNewFile = id + fileFormat;
-        s3service.putObject(bucketName, generateLinkWithUserIdForS3Images(userId) + nameOfNewFile, imageFile.getBytes());
-        image.setUri(nameOfNewFile);
+        String nameOfNewFile = id + "_" + originalFilename;
+        s3service.putObject(
+                bucketName,
+                generateLinkWithUserIdForS3Images(userId) + nameOfNewFile,
+                imageFile.getBytes());
+        image.setUrl(nameOfNewFile);
         image.setId(id);
         image.setUserId(userId);
-        imageRepository.save(image);
-        return image;
+        return imageRepository.save(image);
     }
 
-    private String checkAndGetFileFormat(MultipartFile imageFile) {
-        String originalFilename = imageFile.getOriginalFilename();
-        String fileFormat = Objects.requireNonNull(originalFilename).substring(originalFilename.indexOf("."));
-        if (!fileFormat.contentEquals(".jpg")
-                && !fileFormat.contentEquals(".png")
-                && !fileFormat.contentEquals(".webp")
-                && !fileFormat.contentEquals(".bmp")
-                && !fileFormat.contentEquals(".jpeg")
-                && !fileFormat.contentEquals(".gif")
-                && !fileFormat.contentEquals(".tiff")) {
-            throw new InvalidFileFormatException("incorrect image format, please send image with .jpg, .jpeg, .png, .webp, .bmp, .gif and .tiff formats.");
-        }
-        return fileFormat;
-    }
-
-
-    @CachePut(cacheNames = "imageCache", key = "#imageId")
-    public Image updateImageById(String imageId, Image image, String userId) {
+    @CachePut(cacheNames = "imageCache", key = "'image-' + #imageId")
+    public Image updateImageById(String imageId, Image newImage, String userId) {
         Image imageToUpdate = imageRepository.findByIdAndUserId(imageId, userId)
-                .orElseThrow(() -> new ImageNotFoundException("image with this id not found."));
-        String imageName = image.getName();
+                .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
+        String imageName = newImage.getName();
         if (imageRepository.findByNameAndUserId(imageName, userId).isPresent()) {
-            throw new ImageDuplicationException("image with this name is already defined.");
+            throw new ImageDuplicationException("image with this name is already defined");
         }
         imageToUpdate.setName(imageName);
-        imageRepository.save(imageToUpdate);
-        return imageToUpdate;
+        return imageRepository.save(imageToUpdate);
     }
 
-    @CacheEvict(cacheNames = "imageCache", key = "#imageId")
+    @CacheEvict(cacheNames = "imageCache", allEntries = true)
     public Image deleteImageById(String imageId, String userId) {
         Image imageToDelete = imageRepository.findByIdAndUserId(imageId, userId)
-                .orElseThrow(() -> new ImageNotFoundException("image with this id not found."));
-        s3service.deleteObject(bucketName, "images/" + imageToDelete.getUri());
+                .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
+        s3service.deleteObject(bucketName, "images/" + imageToDelete.getUrl());
         imageRepository.delete(imageToDelete);
         return imageToDelete;
     }

@@ -3,8 +3,6 @@ package com.online.gallery.exception.auth;
 import com.online.gallery.controller.auth.AuthenticationController;
 import com.online.gallery.dto.response.BadRequestExceptionResponse;
 import com.online.gallery.dto.response.NotFoundExceptionResponse;
-import com.online.gallery.exception.auth.TokenDuplicationException;
-import com.online.gallery.exception.auth.TokenExpirationException;
 import com.online.gallery.exception.user.UserDuplicationException;
 import com.online.gallery.exception.user.UserNotEnabledException;
 import com.online.gallery.exception.user.UserNotFoundException;
