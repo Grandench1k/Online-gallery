@@ -10,6 +10,7 @@ import com.online.gallery.service.auth.AuthService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.validation.annotation.Validated;
@@ -28,7 +29,7 @@ public class DefaultAuthController implements AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<AuthTokenResponse> startSignUp(
-            @RequestBody @Validated SignUpRequest request) throws MessagingException {
+            @RequestBody @Valid SignUpRequest request) throws MessagingException {
         return ResponseEntity
                 .ok(service.processSignUp(request));
     }
@@ -41,7 +42,7 @@ public class DefaultAuthController implements AuthController {
 
     @PostMapping("/signin")
     public ResponseEntity<AuthTokenResponse> signIn(
-            @RequestBody @Validated SignInRequest request) {
+            @RequestBody @Valid SignInRequest request) {
         return ResponseEntity
                 .ok(service.authenticate(request));
     }
@@ -61,7 +62,7 @@ public class DefaultAuthController implements AuthController {
 
     @PostMapping("password")
     public ResponseEntity<OkResponse> forgotPassword(
-            @RequestBody @Validated PasswordResetStartRequest passwordResetStartRequest
+            @RequestBody @Valid PasswordResetStartRequest passwordResetStartRequest
     ) throws MessagingException {
         return ResponseEntity
                 .ok(new OkResponse(service.sendMessageForReset(passwordResetStartRequest.getEmail())));
@@ -76,7 +77,7 @@ public class DefaultAuthController implements AuthController {
     @PostMapping("password/{token}")
     public ResponseEntity<OkResponse> completePasswordReset(
             @PathVariable String token,
-            @RequestBody @Validated PasswordResetCompleteRequest passwordResetCompleteRequest) {
+            @RequestBody @Valid PasswordResetCompleteRequest passwordResetCompleteRequest) {
         return ResponseEntity
                 .ok(new OkResponse(service.resetPassword(token,
                         passwordResetCompleteRequest.getPassword())));

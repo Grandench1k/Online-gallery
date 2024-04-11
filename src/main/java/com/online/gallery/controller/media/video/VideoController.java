@@ -104,7 +104,9 @@ public interface VideoController {
                             content = @Content(mediaType = "application/json",
                                     schema = @Schema(implementation = BadRequestExceptionResponse.class)))
             })
-    ResponseEntity<Video> updateVideoById(String id, Video video, Authentication authentication);
+    ResponseEntity<Video> updateVideoById(String id,
+                                          Video video,
+                                          Authentication authentication);
 
     @Operation(summary = "DELETE video by Id",
             description = "DELETE video by Id and UserId",

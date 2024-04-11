@@ -3,6 +3,7 @@ package com.online.gallery.controller.media.image;
 import com.online.gallery.model.media.Image;
 import com.online.gallery.service.media.image.ImageService;
 import com.online.gallery.service.user.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -50,7 +51,7 @@ public class DefaultImageController implements ImageController {
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Image> saveImage(
-            @RequestPart @Validated Image image,
+            @RequestPart @Valid Image image,
             @RequestPart MultipartFile imageFile,
             Authentication authentication) throws IOException {
         return ResponseEntity
@@ -61,7 +62,7 @@ public class DefaultImageController implements ImageController {
     @PatchMapping("/{imageId}")
     public ResponseEntity<Image> updateImageById(
             @PathVariable String imageId,
-            @RequestBody @Validated Image image,
+            @RequestBody @Valid Image image,
             Authentication authentication) {
         return ResponseEntity
                 .ok()

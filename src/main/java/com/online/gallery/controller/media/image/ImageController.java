@@ -53,7 +53,7 @@ public interface ImageController {
                                     mediaType = "application/json",
                                     schema = @Schema(implementation = NotFoundExceptionResponse.class)))
             })
-    ResponseEntity<byte[]> getImageById(@PathVariable String id, Authentication authentication);
+    ResponseEntity<byte[]> getImageById(String id, Authentication authentication);
 
     @Operation(summary = "POST image",
             description = "POST image by userId",
@@ -101,8 +101,8 @@ public interface ImageController {
                                     schema = @Schema(implementation = BadRequestExceptionResponse.class)))
             })
     ResponseEntity<Image> updateImageById(
-            @PathVariable String id,
-            @RequestBody Image image,
+            String id,
+            Image image,
             Authentication authentication);
 
     @Operation(summary = "DELETE image by Id",

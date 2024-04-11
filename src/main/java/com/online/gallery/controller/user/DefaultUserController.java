@@ -3,6 +3,7 @@ package com.online.gallery.controller.user;
 import com.online.gallery.dto.request.PasswordUpdateRequest;
 import com.online.gallery.dto.response.OkResponse;
 import com.online.gallery.service.user.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -57,7 +58,7 @@ public class DefaultUserController implements UserController {
 
     @PatchMapping(value = "/password", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OkResponse> updateUserPassword(
-            @RequestBody @Validated PasswordUpdateRequest request,
+            @RequestBody @Valid PasswordUpdateRequest request,
             Authentication authentication) {
         return ResponseEntity
                 .ok()

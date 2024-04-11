@@ -3,6 +3,7 @@ package com.online.gallery.controller.media.video;
 import com.online.gallery.model.media.Video;
 import com.online.gallery.service.media.video.DefaultVideoService;
 import com.online.gallery.service.user.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -43,7 +44,7 @@ public class DefaultVideoController implements VideoController {
 
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<Video> saveVideo(
-            @RequestPart @Validated Video video,
+            @RequestPart @Valid Video video,
             @RequestPart MultipartFile videoFile,
             Authentication authentication) throws IOException {
         return ResponseEntity
@@ -54,7 +55,7 @@ public class DefaultVideoController implements VideoController {
     @PatchMapping("/{videoId}")
     public ResponseEntity<Video> updateVideoById(
             @PathVariable String videoId,
-            @RequestBody @Validated Video video,
+            @RequestBody @Valid Video video,
             Authentication authentication) {
         return ResponseEntity
                 .ok()
