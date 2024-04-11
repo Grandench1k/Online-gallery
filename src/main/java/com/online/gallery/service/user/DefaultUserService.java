@@ -1,5 +1,14 @@
 package com.online.gallery.service.user;
 
+import com.online.gallery.exception.file.InvalidFileFormatException;
+import com.online.gallery.exception.file.InvalidFilenameException;
+import com.online.gallery.exception.media.image.ImageNotFoundException;
+import com.online.gallery.exception.user.PasswordsMatchException;
+import com.online.gallery.exception.user.UserNotFoundException;
+import com.online.gallery.exception.user.WrongPasswordException;
+import com.online.gallery.model.user.User;
+import com.online.gallery.repository.user.UserRepository;
+import com.online.gallery.storage.s3.service.S3service;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
@@ -10,15 +19,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.exception.file.InvalidFileFormatException;
-import com.online.gallery.exception.file.InvalidFilenameException;
-import com.online.gallery.exception.image.ImageNotFoundException;
-import com.online.gallery.exception.user.PasswordsMatchException;
-import com.online.gallery.exception.user.UserNotFoundException;
-import com.online.gallery.exception.user.WrongPasswordException;
-import com.online.gallery.model.user.User;
-import com.online.gallery.repository.UserRepository;
-import com.online.gallery.storage.s3.service.S3service;
 
 import java.io.IOException;
 import java.util.Arrays;

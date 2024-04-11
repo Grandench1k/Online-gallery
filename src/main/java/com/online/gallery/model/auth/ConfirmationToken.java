@@ -14,10 +14,11 @@ public class ConfirmationToken {
     @Id
     private String id;
     private String userId;
-    private LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(15);
+    private LocalDateTime expiredAt;
 
     public ConfirmationToken(String id, String userId) {
         this.id = id;
         this.userId = userId;
+        LocalDateTime.now().plusMinutes(15);
     }
 }

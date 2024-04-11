@@ -1,6 +1,6 @@
 package com.online.gallery.exception.auth;
 
-import com.online.gallery.controller.auth.AuthenticationController;
+import com.online.gallery.controller.auth.AuthController;
 import com.online.gallery.dto.response.BadRequestExceptionResponse;
 import com.online.gallery.dto.response.NotFoundExceptionResponse;
 import com.online.gallery.exception.user.UserDuplicationException;
@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@RestControllerAdvice(basePackageClasses = AuthenticationController.class)
+@RestControllerAdvice(basePackageClasses = AuthController.class)
 public class AuthenticationExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)

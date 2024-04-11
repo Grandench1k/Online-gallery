@@ -1,14 +1,14 @@
 package com.online.gallery.controller.user;
 
+import com.online.gallery.dto.request.PasswordUpdateRequest;
+import com.online.gallery.dto.response.OkResponse;
+import com.online.gallery.service.user.UserService;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.dto.request.PasswordUpdateRequest;
-import com.online.gallery.dto.response.OkResponse;
-import com.online.gallery.service.user.UserService;
 
 import java.io.IOException;
 

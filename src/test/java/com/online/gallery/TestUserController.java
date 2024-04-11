@@ -2,7 +2,7 @@ package com.online.gallery;
 
 import com.online.gallery.model.user.Role;
 import com.online.gallery.model.user.User;
-import com.online.gallery.repository.UserRepository;
+import com.online.gallery.repository.user.UserRepository;
 import com.online.gallery.security.configuration.ApplicationConfiguration;
 import com.online.gallery.security.service.JwtService;
 import com.online.gallery.storage.s3.service.S3service;

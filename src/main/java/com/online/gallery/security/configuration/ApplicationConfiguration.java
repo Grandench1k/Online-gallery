@@ -1,6 +1,6 @@
 package com.online.gallery.security.configuration;
 
-import com.online.gallery.repository.UserRepository;
+import com.online.gallery.repository.user.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

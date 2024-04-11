@@ -1,5 +1,9 @@
 package com.online.gallery.controller.user;
 
+import com.online.gallery.dto.request.PasswordUpdateRequest;
+import com.online.gallery.dto.response.BadRequestExceptionResponse;
+import com.online.gallery.dto.response.NotFoundExceptionResponse;
+import com.online.gallery.dto.response.OkResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -9,10 +13,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
-import com.online.gallery.dto.request.PasswordUpdateRequest;
-import com.online.gallery.dto.response.BadRequestExceptionResponse;
-import com.online.gallery.dto.response.NotFoundExceptionResponse;
-import com.online.gallery.dto.response.OkResponse;
 
 import java.io.IOException;
 
