@@ -21,4 +21,8 @@ public class PasswordResetToken {
         this.email = email;
         setExpiredAt(LocalDateTime.now().plusMinutes(15));
     }
+
+    public boolean isExpired() {
+        return this.expiredAt.isBefore(LocalDateTime.now());
+    }
 }

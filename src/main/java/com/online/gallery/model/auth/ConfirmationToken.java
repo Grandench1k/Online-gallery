@@ -21,4 +21,8 @@ public class ConfirmationToken {
         this.userId = userId;
         LocalDateTime.now().plusMinutes(15);
     }
+
+    public boolean isExpired() {
+        return this.expiredAt.isBefore(LocalDateTime.now());
+    }
 }

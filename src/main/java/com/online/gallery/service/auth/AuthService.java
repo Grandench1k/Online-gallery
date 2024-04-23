@@ -18,11 +18,12 @@ public interface AuthService {
 
     String completeSignUp(String token);
 
+    void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
+
     String sendMessageForReset(String token) throws MessagingException;
 
     String checkPasswordResetTokenAndUser(String token);
 
     String resetPassword(String token, String newPassword);
 
-    void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
 }

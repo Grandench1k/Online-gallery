@@ -45,6 +45,8 @@ public class DefaultAuthService implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final ConfirmationTokenRepository confirmationTokenRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final String urlForEmailMessageGeneration = "http://localhost:8080";
+    private String endpointForCompleteSignUp = "/api/v1/auth/verify/";
 
     public DefaultAuthService(UserRepository userRepository,
                               PasswordEncoder passwordEncoder,
@@ -62,65 +64,69 @@ public class DefaultAuthService implements AuthService {
         this.passwordResetTokenRepository = passwordResetTokenRepository;
     }
 
-    public AuthTokenResponse processSignUp(SignUpRequest request) throws MessagingException {
-        String email = request.getEmail();
-        userRepository.findByEmail(email).ifPresent(user -> {
-            if (user.isEnabled()) {
-                throw new UserDuplicationException("This user already exists.");
-            }
-            userRepository.delete(user);
-        });
-        User user = buildNewUser(request);
-        userRepository.save(user);
-        String token = createConfirmationToken(user);
-        mailSender.sendConfirmationEmail(buildConfirmationEmail(email, token), email, "Confirm Email");
-        return buildAuthResponse(user);
-    }
-
-    private User buildNewUser(SignUpRequest request) {
-        return User.builder()
-                .id(new ObjectId().toString())
-                .nickname(request.getUsername())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .email(request.getEmail())
-                .role(Role.USER)
-                .build();
-    }
-
-    private String createConfirmationToken(User user) {
-        String token = new ObjectId().toString();
-        confirmationTokenRepository.save(new ConfirmationToken(token, user.getId()));
-        return token;
-    }
-
-    private String buildConfirmationEmail(String email, String token) {
-        return EmailMessageBuilder.BuildConfirmationEmail(
-                email, "http://localhost:8080/api/v1/auth/signup/" + token);
-    }
-
-    public AuthTokenResponse authenticate(SignInRequest request) {
-        String email = request.getEmail();
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not found."));
-
-        user.checkIfUserEnabled();
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, request.getPassword()));
-
-        return buildAuthResponse(user);
-    }
-
     private AuthTokenResponse buildAuthResponse(User user) {
         var jwtToken = jwtService.generateAccessToken(user);
         var refreshToken = jwtService.generateRefreshToken(user);
         return new AuthTokenResponse(jwtToken, refreshToken);
     }
 
+    public AuthTokenResponse processSignUp(SignUpRequest request) throws MessagingException {
+        String userEmail = request.getEmail();
+        userRepository.findByEmail(userEmail).ifPresent(user -> {
+            if (user.isEnabled()) {
+                throw new UserDuplicationException("user with this email already exist");
+            } else {
+                confirmationTokenRepository.findByUserId(user.getId())
+                        .ifPresent(token -> {
+                            if (!token.isExpired()) {
+                                throw new TokenDuplicationException(
+                                        "confirmation token has already been sent," +
+                                                " please check your email");
+                            } else {
+                                confirmationTokenRepository.delete(token);
+                                userRepository.delete(user);
+                            }
+                        });
+            }
+        });
+        User user = User.builder()
+                .id(new ObjectId().toString())
+                .nickname(request.getUsername())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .email(request.getEmail())
+                .role(Role.USER)
+                .build();
+        userRepository.save(user);
+
+        String token = new ObjectId().toString();
+
+        confirmationTokenRepository.save(new ConfirmationToken(token, user.getId()));
+
+        mailSender.sendConfirmationEmail(EmailMessageBuilder.BuildConfirmationEmail(
+                        userEmail,
+                        urlForEmailMessageGeneration + endpointForCompleteSignUp + token),
+                userEmail,
+                "Confirm Email");
+        return buildAuthResponse(user);
+    }
+
+    public AuthTokenResponse authenticate(SignInRequest request) {
+        String userEmail = request.getEmail();
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found."));
+
+        user.checkIfUserEnabled();
+        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userEmail, request.getPassword()));
+
+        return buildAuthResponse(user);
+    }
+
     public String completeSignUp(String token) {
         ConfirmationToken confirmationToken = confirmationTokenRepository.findById(token)
                 .orElseThrow(() -> new TokenNotFoundException("Confirmation token not found."));
-        if (confirmationToken.getExpiredAt().isBefore(LocalDateTime.now())) {
-            throw new TokenExpirationException("Confirmation token is expired.");
+        if (confirmationToken.isExpired()) {
+            throw new TokenExpirationException("confirmation token is expired");
         }
-
         User user = userRepository.findById(confirmationToken.getUserId())
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
         user.setEnabled(true);
@@ -128,6 +134,28 @@ public class DefaultAuthService implements AuthService {
 
         confirmationTokenRepository.deleteById(confirmationToken.getId());
         return "User successfully activated.";
+    }
+
+    public void refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response) throws IOException {
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        final String refreshToken;
+        final String userEmail;
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        refreshToken = authHeader.substring(7);
+        userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail != null) {
+            var user = this.userRepository.findByEmail(userEmail)
+                    .orElseThrow(() -> new UserNotFoundException("user not found"));
+            if (jwtService.isTokenValid(refreshToken, user)) {
+                var accessToken = jwtService.generateAccessToken(user);
+                var authResponse = new AuthTokenResponse(accessToken, refreshToken);
+                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
+            }
+        }
     }
 
     public String sendMessageForReset(String email) throws MessagingException {
@@ -182,27 +210,5 @@ public class DefaultAuthService implements AuthService {
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
         return "password successfully changed";
-    }
-
-    public void refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
-        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String refreshToken;
-        final String userEmail;
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return;
-        }
-        refreshToken = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(refreshToken);
-        if (userEmail != null) {
-            var user = this.userRepository.findByEmail(userEmail)
-                    .orElseThrow(() -> new UserNotFoundException("user not found"));
-            if (jwtService.isTokenValid(refreshToken, user)) {
-                var accessToken = jwtService.generateAccessToken(user);
-                var authResponse = new AuthTokenResponse(accessToken, refreshToken);
-                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-            }
-        }
     }
 }
