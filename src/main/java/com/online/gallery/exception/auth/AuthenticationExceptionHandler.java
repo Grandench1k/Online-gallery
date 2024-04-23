@@ -1,47 +1,35 @@
 package com.online.gallery.exception.auth;
 
 import com.online.gallery.controller.auth.AuthController;
-import com.online.gallery.dto.response.BadRequestExceptionResponse;
-import com.online.gallery.dto.response.NotFoundExceptionResponse;
-import com.online.gallery.exception.user.UserDuplicationException;
-import com.online.gallery.exception.user.UserNotEnabledException;
-import com.online.gallery.exception.user.UserNotFoundException;
+import com.online.gallery.dto.response.ExceptionResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+
 @RestControllerAdvice(basePackageClasses = AuthController.class)
 public class AuthenticationExceptionHandler {
 
-    @ExceptionHandler(UserNotFoundException.class)
-    public ResponseEntity<NotFoundExceptionResponse> handleNotFound(UserNotFoundException e) {
-        NotFoundExceptionResponse response = new NotFoundExceptionResponse(e.getMessage());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+    private static final ZoneId UTC = ZoneId.of("UTC");
+
+    private ResponseEntity<ExceptionResponse> buildResponse(String message, HttpStatus status) {
+        ExceptionResponse response = new ExceptionResponse(
+                ZonedDateTime.now(UTC),
+                status.value(),
+                message);
+        return new ResponseEntity<>(response, status);
     }
 
-    @ExceptionHandler(UserDuplicationException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleAlreadyDefined(UserDuplicationException e) {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    @ExceptionHandler(UserNotEnabledException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleUserNotEnabled(UserNotEnabledException e) {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
-    }
-
-    @ExceptionHandler(TokenExpirationException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleConfirmationTokenIsExpired(TokenExpirationException e) {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    @ExceptionHandler(TokenNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleUserNotFoundException(RuntimeException e) {
+        return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(TokenDuplicationException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handlePasswordResetTokenAlreadyDefined(
-            TokenDuplicationException e) {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    public ResponseEntity<ExceptionResponse> handleConflictExceptions(RuntimeException e) {
+        return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
     }
 }

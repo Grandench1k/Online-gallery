@@ -1,8 +1,7 @@
 package com.online.gallery.controller.user;
 
 import com.online.gallery.dto.request.PasswordUpdateRequest;
-import com.online.gallery.dto.response.BadRequestExceptionResponse;
-import com.online.gallery.dto.response.NotFoundExceptionResponse;
+import com.online.gallery.dto.response.ExceptionResponse;
 import com.online.gallery.dto.response.OkResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,85 +15,54 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
-@Tag(name = "UserController",
-        description = "Controller for manage users and their profile images")
 @SecurityRequirement(name = "Authorization")
+@Tag(name = "User controller", description =
+        "controller for managing user profiles and their associated operations")
 public interface UserController {
 
-    @Operation(summary = "GET profile image",
-            description = "GET profile image by userId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(mediaType = "image/jpeg")),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Not found any profile images.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = NotFoundExceptionResponse.class)))
-            })
+    @Operation(summary = "get user profile image",
+            description = "retrieves a presigned URL to download the current user's profile image")
+    @ApiResponse(responseCode = "200", description = "profile image URL retrieved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Byte.class)))
+    @ApiResponse(responseCode = "404", description = "no profile image found for the user",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<byte[]> getUserProfileImage(Authentication authentication);
 
-    @Operation(summary = "POST profile image",
-            description = "POST profile image by userId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = OkResponse.class))),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Incorrect profile image format," +
-                                    " please send image with .jpg, .png, .webp and .jpeg formats.",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = BadRequestExceptionResponse.class)))
-            })
+    @Operation(summary = "save profile image",
+            description = "saves an profile image and returns the updated user data")
+    @ApiResponse(responseCode = "200", description = "update URL generated successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = OkResponse.class)))
+    @ApiResponse(responseCode = "404", description = "no existing profile image found to update",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<OkResponse> saveUserProfileImage(
             MultipartFile profileImageFile,
             Authentication authentication) throws IOException;
 
-    @Operation(summary = "UPDATE profile image by Id",
-            description = "UPDATE profile image by UserId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = OkResponse.class))),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Not found any profile images.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = NotFoundExceptionResponse.class)))
-            })
+    @Operation(summary = "update profile image",
+            description = "updates an profile image and returns the updated user data")
+    @ApiResponse(responseCode = "200", description = "update URL generated successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = OkResponse.class)))
+    @ApiResponse(responseCode = "404", description = "no existing profile image found to update",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<OkResponse> updateUserProfileImage(
             MultipartFile profileImageFile,
             Authentication authentication) throws IOException;
 
-    @Operation(summary = "UPDATE password",
-            description = "UPDATE user password",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = OkResponse.class))),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Invalid old password",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = BadRequestExceptionResponse.class))),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "passwords match.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = BadRequestExceptionResponse.class)))
-            })
+    @Operation(summary = "update user password",
+            description = "updates the user's password after validating the old password")
+    @ApiResponse(responseCode = "200", description = "password updated successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = OkResponse.class)))
+    @ApiResponse(responseCode = "400", description = "invalid old password provided or new password " +
+            "matches the old password",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<OkResponse> updateUserPassword(
             PasswordUpdateRequest passwordUpdateRequest,
             Authentication authentication);

@@ -1,135 +1,114 @@
 package com.online.gallery.exception;
 
-import com.online.gallery.dto.response.BadRequestExceptionResponse;
-import com.online.gallery.dto.response.DefaultExceptionResponse;
-import com.online.gallery.exception.auth.TokenNotFoundException;
-import com.online.gallery.exception.file.InvalidFilenameException;
+import com.online.gallery.dto.response.ExceptionResponse;
+import com.online.gallery.exception.media.image.ImageDuplicationException;
+import com.online.gallery.exception.media.image.ImageNotFoundException;
+import com.online.gallery.exception.media.video.VideoDuplicationException;
+import com.online.gallery.exception.media.video.VideoNotFoundException;
+import com.online.gallery.exception.user.*;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.mail.MessagingException;
-import org.apache.tomcat.util.http.fileupload.impl.FileSizeLimitExceededException;
 import org.apache.tomcat.util.http.fileupload.impl.InvalidContentTypeException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class DefaultExceptionHandler {
+
+    private static final ZoneId UTC = ZoneId.of("UTC");
+
+    private ResponseEntity<ExceptionResponse> buildResponse(String message, HttpStatus status) {
+        ExceptionResponse response = new ExceptionResponse(
+                ZonedDateTime.now(UTC),
+                status.value(),
+                message);
+        return new ResponseEntity<>(response, status);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
-        List<String> errors = e.getBindingResult().getAllErrors()
+    public ResponseEntity<ExceptionResponse> handleMethodArgumentNotValidException(
+            MethodArgumentNotValidException e) {
+        String errorMessage = e.getBindingResult().getAllErrors()
                 .stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
-                .collect(Collectors.toList());
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse(String.join(", ", errors));
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
+                .collect(Collectors.joining(", "));
+        return buildResponse(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(NullPointerException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleNullPointerException() {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse("One of the variables is null");
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ExceptionResponse> handleBadCredentialsException(
+            BadCredentialsException e) {
+        return buildResponse(e.getMessage(), HttpStatus.UNAUTHORIZED);
     }
 
-    @ExceptionHandler(InvalidContentTypeException.class)
-    public ResponseEntity<DefaultExceptionResponse> handleInvalidContentTypeException(InvalidContentTypeException e) {
-        DefaultExceptionResponse response = new DefaultExceptionResponse(
-                ZonedDateTime.now(ZoneId.of("Z")),
-                HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
-                e.getMessage());
+    @ExceptionHandler({UserNotFoundException.class,
+            ImageNotFoundException.class,
+            VideoNotFoundException.class})
+    public ResponseEntity<ExceptionResponse> handleNotFoundExceptionz(
+            RuntimeException e) {
+        return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
 
-        return ResponseEntity
-                .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                .body(response);
+    @ExceptionHandler(MalformedJwtException.class)
+    public ResponseEntity<ExceptionResponse> handleMalformedJwtException(
+            MalformedJwtException e) {
+        return buildResponse("Invalid JWT token: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler({HttpMediaTypeNotSupportedException.class,
+            InvalidContentTypeException.class})
+    public ResponseEntity<ExceptionResponse> handleUnsupportedMediaTypeExceptions(
+            RuntimeException e) {
+        return buildResponse(e.getMessage(), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
-    }
-
-    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
-    public ResponseEntity<DefaultExceptionResponse> handleHttpMediaTypeNotSupportedException(
-            HttpMediaTypeNotSupportedException e) {
-        String answer = e.getMessage() + ". Use by default application/json or multipart/form-data if you send media";
-
-        DefaultExceptionResponse response = new DefaultExceptionResponse(
-                ZonedDateTime.now(ZoneId.of("Z")),
-                HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
-                answer);
-
-        return ResponseEntity
-                .status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
-                .body(response);
-    }
-
-    @ExceptionHandler(MissingServletRequestPartException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleMissingServletRequestPartException(
-            MissingServletRequestPartException e) {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
+    public ResponseEntity<ExceptionResponse> handleHttpMessageNotReadableException(
+            HttpMessageNotReadableException e) {
+        return buildResponse("Required request body is missing", HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    public ResponseEntity<DefaultExceptionResponse> handleHttpRequestMethodNotSupportedException(
+    public ResponseEntity<ExceptionResponse> handleHttpRequestMethodNotAllowedException(
             HttpRequestMethodNotSupportedException e) {
-        DefaultExceptionResponse response = new DefaultExceptionResponse(
-                ZonedDateTime.now(ZoneId.of("Z")),
-                HttpStatus.METHOD_NOT_ALLOWED.value(),
-                e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.METHOD_NOT_ALLOWED)
-                .body(response);
+        return buildResponse(e.getMessage(), HttpStatus.METHOD_NOT_ALLOWED);
     }
 
-    @ExceptionHandler(FileSizeLimitExceededException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleFileSizeLimitExceededException() {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse("File limit exceeded 20 megabytes");
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
+    @ExceptionHandler({ImageDuplicationException.class,
+            VideoDuplicationException.class,
+            UserDuplicationException.class})
+    public ResponseEntity<ExceptionResponse> handleConflictExceptions(
+            RuntimeException e) {
+        return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(MessagingException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleMessagingException() {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse("Messaging exception");
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
+    @ExceptionHandler({PasswordsMatchException.class,
+            WrongPasswordException.class,
+            UserNotEnabledException.class,
+            PasswordsMatchException.class})
+    public ResponseEntity<ExceptionResponse> handleHttpRequestMethodNotAllowedExceptions(
+            RuntimeException e) {
+        return buildResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(TokenNotFoundException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleNotFoundConfirmationToken(TokenNotFoundException e) {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
-    }
-
-    @ExceptionHandler(InvalidFilenameException.class)
-    public ResponseEntity<BadRequestExceptionResponse> handleInvalidFilename(InvalidFilenameException e) {
-        BadRequestExceptionResponse response = new BadRequestExceptionResponse(e.getMessage());
-        return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(response);
+    @ExceptionHandler({NoSuchBucketException.class,
+            MessagingException.class,
+            NullPointerException.class})
+    public ResponseEntity<ExceptionResponse> handleInternalServerErrorExceptions(
+            RuntimeException e) {
+        return buildResponse(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -1,7 +1,6 @@
 package com.online.gallery.controller.media.video;
 
-import com.online.gallery.dto.response.BadRequestExceptionResponse;
-import com.online.gallery.dto.response.NotFoundExceptionResponse;
+import com.online.gallery.dto.response.ExceptionResponse;
 import com.online.gallery.model.media.Video;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -16,112 +15,57 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-@Tag(name = "VideoController",
-        description = "Controller for manage videos")
 @SecurityRequirement(name = "Authorization")
+@Tag(name = "Video controller", description = "controller for managing videos")
 public interface VideoController {
-    @Operation(summary = "GET all videos",
-            description = "GET all videos by userId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Video.class))),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Videos not found.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = NotFoundExceptionResponse.class)))
-            })
+    @Operation(summary = "list all videos",
+            description = "retrieves all videos associated with the authenticated user")
+    @ApiResponse(responseCode = "200", description = "videos retrieved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = List.class)))
+    @ApiResponse(responseCode = "404", description = "no videos found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<List<Video>> getAllVideos(Authentication authentication);
 
-    @Operation(summary = "GET video by Id",
-            description = "GET video by Id and UserId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(mediaType = "video/mp4")
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Video with this id not found.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = NotFoundExceptionResponse.class)))
-            })
+    @Operation(summary = "get video by id",
+            description = "retrieves a specific video by its id for the authenticated user")
+    @ApiResponse(responseCode = "200", description = "video retrieved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Byte.class)))
+    @ApiResponse(responseCode = "404", description = "video not found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<byte[]> getVideoById(String id, Authentication authentication);
 
-    @Operation(summary = "POST video",
-            description = "POST video by userId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Video.class))),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Incorrect video format," +
-                                    " please send video with .mp4, .mpeg and .ogg formats.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = BadRequestExceptionResponse.class))),
-                    @ApiResponse(
-                            responseCode = "409",
-                            description = "Video with this name is already defined.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = NotFoundExceptionResponse.class)))
-            })
+    @Operation(summary = "save video",
+            description = "saves video metadata and returns the updated video data")
+    @ApiResponse(responseCode = "200", description = "video saved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Video.class)))
     ResponseEntity<Video> saveVideo(
             Video video,
             MultipartFile videoFile,
             Authentication authentication) throws IOException;
 
-    @Operation(summary = "UPDATE video by Id",
-            description = "UPDATE video by Id and UserId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Video.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Video with this id not found.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = NotFoundExceptionResponse.class)
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "409",
-                            description = "Video with this name is already defined.",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = BadRequestExceptionResponse.class)))
-            })
+    @Operation(summary = "update video details",
+            description = "updates details of a specific video for the authenticated user")
+    @ApiResponse(responseCode = "200", description = "video updated successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Video.class)))
+    @ApiResponse(responseCode = "404", description = "video with this id not found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<Video> updateVideoById(String id,
                                           Video video,
                                           Authentication authentication);
-
-    @Operation(summary = "DELETE video by Id",
-            description = "DELETE video by Id and UserId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Video.class))),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Videos not found.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = NotFoundExceptionResponse.class)))
-            })
+    @Operation(summary = "delete video by id",
+            description = "deletes a specific video for the authenticated user")
+    @ApiResponse(responseCode = "200", description = "video deleted successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Video.class)))
+    @ApiResponse(responseCode = "404", description = "video with this id not found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<Video> deleteVideoById(String id, Authentication authentication);
 }

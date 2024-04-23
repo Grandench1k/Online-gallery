@@ -1,8 +1,6 @@
 package com.online.gallery.controller.media.image;
 
-import com.online.gallery.dto.response.BadRequestExceptionResponse;
-import com.online.gallery.dto.response.DefaultExceptionResponse;
-import com.online.gallery.dto.response.NotFoundExceptionResponse;
+import com.online.gallery.dto.response.ExceptionResponse;
 import com.online.gallery.model.media.Image;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -18,106 +16,59 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.List;
 
-@Tag(name = "ImageController",
-        description = "Controller for manage images")
 @SecurityRequirement(name = "Authorization")
+@Tag(name = "Image controller", description = "controller for managing images")
 public interface ImageController {
-    @Operation(summary = "GET all images",
-            description = "GET all images by userId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Image.class))),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Images not found.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = NotFoundExceptionResponse.class)))
-            })
+    @Operation(summary = "list all images",
+            description = "retrieves all images associated with the authenticated user")
+    @ApiResponse(responseCode = "200", description = "images retrieved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = List.class)))
+    @ApiResponse(responseCode = "404", description = "no images found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<List<Image>> getAllImages(Authentication authentication);
 
-    @Operation(summary = "GET image by Id",
-            description = "GET image by Id and UserId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(mediaType = "image/png")),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Image with this id not found.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = NotFoundExceptionResponse.class)))
-            })
+    @Operation(summary = "get image by id",
+            description = "retrieves a specific image by its id for the authenticated user")
+    @ApiResponse(responseCode = "200", description = "image retrieved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Image.class)))
+    @ApiResponse(responseCode = "404", description = "image not found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<byte[]> getImageById(String id, Authentication authentication);
 
-    @Operation(summary = "POST image",
-            description = "POST image by userId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Image.class))),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "Incorrect image format, please send " +
-                                    "image with .jpg, .jpeg, .png, .webp, .bmp, .gif and .tiff formats.",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = BadRequestExceptionResponse.class))),
-                    @ApiResponse(
-                            responseCode = "409",
-                            description = "Image with this name is already defined.",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = BadRequestExceptionResponse.class)))
-            })
+    @Operation(summary = "save image",
+            description = "saves an image metadata and returns the updated image data")
+    @ApiResponse(responseCode = "200", description = "image saved successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Image.class)))
     ResponseEntity<Image> saveImage(
             Image image,
             MultipartFile imageFile,
             Authentication authentication) throws IOException;
 
-    @Operation(summary = "UPDATE image by Id",
-            description = "UPDATE image by Id and UserId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Image.class))),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Image with this id not found.",
-                            content = @Content(mediaType = "application/json",
-                                    schema = @Schema(implementation = BadRequestExceptionResponse.class))),
-                    @ApiResponse(
-                            responseCode = "409",
-                            description = "Image with this name is already defined.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = BadRequestExceptionResponse.class)))
-            })
+    @Operation(summary = "update image by id",
+            description = "updates a specific image for the authenticated user")
+    @ApiResponse(responseCode = "200", description = "image updated successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Image.class)))
+    @ApiResponse(responseCode = "404", description = "image with this id not found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<Image> updateImageById(
             String id,
             Image image,
             Authentication authentication);
 
-    @Operation(summary = "DELETE image by Id",
-            description = "DELETE image by Id and UserId",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = Image.class))),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Images not found.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = DefaultExceptionResponse.class)))
-            })
+    @Operation(summary = "delete user image by id",
+            description = "deletes a specific image for the authenticated user")
+    @ApiResponse(responseCode = "200", description = "image deleted successfully",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = Image.class)))
+    @ApiResponse(responseCode = "404", description = "image with this id not found",
+            content = @Content(mediaType = "application/json",
+                    schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<Image> deleteImageById(@PathVariable String id, Authentication authentication);
 }
