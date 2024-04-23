@@ -52,7 +52,7 @@ public class DefaultImageService implements ImageService {
     public byte[] findImageById(String imageId, String userId) {
         Image image = imageRepository.findByIdAndUserId(imageId, userId)
                 .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
-        return s3service.getObject(bucketName, generateLinkWithUserIdForS3Images(userId) + image.getUrl());
+        return s3service.getObject(bucketName, generateLinkWithUserIdForS3Images(userId) + image.getFilePath());
     }
 
     public void checkFileFormat(String originalFilename) {
@@ -82,7 +82,7 @@ public class DefaultImageService implements ImageService {
                 bucketName,
                 generateLinkWithUserIdForS3Images(userId) + nameOfNewFile,
                 imageFile.getBytes());
-        image.setUrl(nameOfNewFile);
+        image.setFilePath(nameOfNewFile);
         image.setId(id);
         image.setUserId(userId);
         return imageRepository.save(image);
@@ -104,7 +104,7 @@ public class DefaultImageService implements ImageService {
     public Image deleteImageById(String imageId, String userId) {
         Image imageToDelete = imageRepository.findByIdAndUserId(imageId, userId)
                 .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
-        s3service.deleteObject(bucketName, "images/" + imageToDelete.getUrl());
+        s3service.deleteObject(bucketName, "images/" + imageToDelete.getFilePath());
         imageRepository.delete(imageToDelete);
         return imageToDelete;
     }

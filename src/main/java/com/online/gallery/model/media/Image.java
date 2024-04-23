@@ -33,14 +33,14 @@ public class Image implements Serializable {
     )
     private String name;
     @Hidden
-    private String url;
+    private String filePath;
     @Hidden
     private String userId;
 
-    public Image(String id, String name, String url, String userId) {
+    public Image(String id, String name, String filePath, String userId) {
         this.id = id;
         this.name = name;
-        this.url = url;
+        this.filePath = filePath;
         this.userId = userId;
     }
 }
