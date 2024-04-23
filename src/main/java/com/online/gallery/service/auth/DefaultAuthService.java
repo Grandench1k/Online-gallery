@@ -80,11 +80,10 @@ public class DefaultAuthService implements AuthService {
     private User buildNewUser(SignUpRequest request) {
         return User.builder()
                 .id(new ObjectId().toString())
-                .username(request.getUsername())
+                .nickname(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
                 .role(Role.USER)
-                .createdAt(LocalDateTime.now())
                 .build();
     }
 

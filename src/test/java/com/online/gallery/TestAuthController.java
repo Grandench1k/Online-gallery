@@ -50,7 +50,7 @@ public class TestAuthController {
     @BeforeEach
     void setUp() {
         String encodedPassword = applicationConfiguration.passwordEncoder().encode("example");
-        User user = User.builder().username("firstname").email("exapmle@mail.org").role(Role.USER).id(userId).password(encodedPassword).build();
+        User user = User.builder().nickname("firstname").email("exapmle@mail.org").role(Role.USER).id(userId).password(encodedPassword).build();
         ConfirmationToken confirmationToken = new ConfirmationToken("id", userId);
         confirmationTokenRepository.save(confirmationToken);
         user.setEnabled(true);

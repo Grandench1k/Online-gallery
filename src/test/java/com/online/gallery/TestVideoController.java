@@ -58,7 +58,7 @@ public class TestVideoController {
     @BeforeEach
     void setUp() throws IOException {
         String encodedPassword = applicationConfiguration.passwordEncoder().encode("example");
-        User user = User.builder().username("firstname").email("exapmle@mail.com").role(Role.USER).id(userId).password(encodedPassword).build();
+        User user = User.builder().nickname("firstname").email("exapmle@mail.com").role(Role.USER).id(userId).password(encodedPassword).build();
         user.setEnabled(true);
         byte[] file = Files.readAllBytes(Path.of(absolutePath));
         s3service.putObject(bucketName, "videos/" + userId + "/" + fileName, file);

@@ -10,7 +10,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 
@@ -22,23 +21,21 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     private String id;
-    private String username;
+    private String nickname;
     private String email;
     private String password;
     private String profileImageId;
     private Role role;
     private boolean enabled;
-    private LocalDateTime createdAt;
 
-    public User(String id, String username, String email, String password, String profileImageId, Role role, boolean enabled, LocalDateTime createdAt) {
+    public User(String id, String nickname, String email, String password, String profileImageId, Role role, boolean enabled) {
         this.id = id;
-        this.username = username;
+        this.nickname = nickname;
         this.email = email;
         this.password = password;
         this.profileImageId = profileImageId;
         this.role = role;
         this.enabled = enabled;
-        this.createdAt = createdAt;
     }
 
     public static UserBuilder builder() {
@@ -62,9 +59,6 @@ public class User implements UserDetails {
 
     @Override
     public boolean isAccountNonExpired() {
-        if (!this.enabled) {
-            return this.getCreatedAt().plusMinutes(15).isAfter(LocalDateTime.now());
-        }
         return true;
     }
 
@@ -90,6 +84,6 @@ public class User implements UserDetails {
     }
 
     public String toString() {
-        return "User(id=" + this.getId() + ", username=" + this.getUsername() + ", email=" + this.getEmail() + ", password=" + this.getPassword() + ", profileImageId=" + this.getProfileImageId() + ", role=" + this.getRole() + ", enabled=" + this.isEnabled() + ", createdAt=" + this.getCreatedAt() + ")";
+        return "User(id=" + this.getId() + ", username=" + this.getNickname() + ", email=" + this.getEmail() + ", password=" + this.getPassword() + ", profileImageId=" + this.getProfileImageId() + ", role=" + this.getRole() + ", enabled=" + this.isEnabled() + ")";
     }
 }
