@@ -63,7 +63,7 @@ public class DefaultUserService implements UserService {
 
     @Cacheable(cacheNames = "userProfileImageCache", key = "#user.id")
     public byte[] getProfileImage(User user) {
-        String profileImageId = user.getProfileImageId();
+        String profileImageId = user.getProfileImageName();
         if (profileImageId == null) {
             throw new ImageNotFoundException("profile image not found");
         }
@@ -93,14 +93,14 @@ public class DefaultUserService implements UserService {
         s3service.putObject(bucketName,
                 generateLinkWithUserIdForS3ProfileImages(user.getId()) + nameOfNewFile,
                 profileImageFile.getBytes());
-        user.setProfileImageId(id);
+        user.setProfileImageName(id);
         userRepository.save(user);
         return "profile image saved";
     }
 
     @CacheEvict(cacheNames = "userProfileImageCache", key = "#user.id")
     public String updateProfileImage(MultipartFile profileImageFile, User user) throws IOException {
-        String profileImageId = user.getProfileImageId();
+        String profileImageId = user.getProfileImageName();
         if (profileImageId == null) {
             throw new ImageNotFoundException("profile image with this ID not found");
         }
@@ -111,7 +111,7 @@ public class DefaultUserService implements UserService {
         s3service.putObject(bucketName,
                 generateLinkWithUserIdForS3ProfileImages(userId) + id,
                 profileImageFile.getBytes());
-        user.setProfileImageId(id);
+        user.setProfileImageName(id);
         userRepository.save(user);
         return "profile image updated";
     }
