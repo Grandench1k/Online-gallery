@@ -52,7 +52,7 @@ public class DefaultVideoService implements VideoService {
         Video video = videoRepository.findByIdAndUserId(videoId, userId)
                 .orElseThrow(() -> new VideoNotFoundException("video with ID " + videoId + " not found"));
         return s3service.getObject(bucketName,
-                generateLinkWithUserIdForS3Videos(userId) + video.getUrl());
+                generateLinkWithUserIdForS3Videos(userId) + video.getFilePath());
     }
 
     public String getFileFormat(MultipartFile videoFile) {
@@ -83,7 +83,7 @@ public class DefaultVideoService implements VideoService {
         s3service.putObject(bucketName,
                 generateLinkWithUserIdForS3Videos(userId) + nameOfNewFile,
                 videoFile.getBytes());
-        videoToSave.setUrl(nameOfNewFile);
+        videoToSave.setFilePath(nameOfNewFile);
         videoToSave.setId(id);
         videoToSave.setUserId(userId);
         return videoRepository.save(videoToSave);
@@ -110,7 +110,7 @@ public class DefaultVideoService implements VideoService {
                 .orElseThrow(() -> new VideoNotFoundException("video with ID " + videoId + " not found"));
         s3service.deleteObject(
                 bucketName,
-                generateLinkWithUserIdForS3Videos(userId) + videoToDelete.getUrl());
+                generateLinkWithUserIdForS3Videos(userId) + videoToDelete.getFilePath());
         videoRepository.delete(videoToDelete);
         return videoToDelete;
     }
