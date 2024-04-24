@@ -41,7 +41,7 @@ public class DefaultUserService implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public String generateLinkWithUserIdForS3ProfileImages(String userId) {
+    private String generateLinkWithUserIdForS3ProfileImages(String userId) {
         return "profileImages/" + userId + "/";
     }
 
@@ -70,7 +70,7 @@ public class DefaultUserService implements UserService {
         return s3service.getObject(bucketName, generateLinkWithUserIdForS3ProfileImages(user.getId()) + profileImageId);
     }
 
-    public String getFileFormat(MultipartFile imageFile) {
+    private String getFileFormat(MultipartFile imageFile) {
         String originalFilename = imageFile.getOriginalFilename();
         if (originalFilename == null || originalFilename.trim().isEmpty()) {
             throw new InvalidFilenameException("invalid filename");

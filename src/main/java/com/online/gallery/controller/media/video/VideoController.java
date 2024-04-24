@@ -26,7 +26,7 @@ public interface VideoController {
     @ApiResponse(responseCode = "404", description = "no videos found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<List<Video>> getAllVideos(Authentication authentication);
+    ResponseEntity<List<Video>> listAllVideos(Authentication authentication);
 
     @Operation(summary = "get video by id",
             description = "retrieves a specific video by its id for the authenticated user")

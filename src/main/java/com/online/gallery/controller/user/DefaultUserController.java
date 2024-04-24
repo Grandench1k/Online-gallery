@@ -25,14 +25,14 @@ public class DefaultUserController implements UserController {
             MediaType.IMAGE_JPEG_VALUE,
             MediaType.IMAGE_GIF_VALUE,
             MediaType.IMAGE_PNG_VALUE})
-    public ResponseEntity<byte[]> getUserProfileImage(Authentication authentication) {
+    public ResponseEntity<byte[]> getProfileImage(Authentication authentication) {
         return ResponseEntity
                 .ok()
                 .body(userService.getProfileImage(userService.getUser(authentication)));
     }
 
     @PostMapping(value = "/profileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<OkResponse> saveUserProfileImage(
+    public ResponseEntity<OkResponse> saveProfileImage(
             @RequestPart MultipartFile profileImageFile,
             Authentication authentication) throws IOException {
         return ResponseEntity
@@ -44,7 +44,7 @@ public class DefaultUserController implements UserController {
     }
 
     @PatchMapping(value = "/profileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<OkResponse> updateUserProfileImage(
+    public ResponseEntity<OkResponse> updateProfileImage(
             @RequestPart MultipartFile profileImageFile,
             Authentication authentication) throws IOException {
         return ResponseEntity
@@ -56,7 +56,7 @@ public class DefaultUserController implements UserController {
     }
 
     @PatchMapping(value = "/password", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OkResponse> updateUserPassword(
+    public ResponseEntity<OkResponse> updatePassword(
             @RequestBody @Valid PasswordUpdateRequest request,
             Authentication authentication) {
         return ResponseEntity

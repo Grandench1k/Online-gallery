@@ -110,7 +110,7 @@ public class DefaultAuthService implements AuthService {
         return buildAuthResponse(user);
     }
 
-    public AuthTokenResponse authenticate(SignInRequest request) {
+    public AuthTokenResponse signIn(SignInRequest request) {
         String userEmail = request.getEmail();
         User user = userRepository.findByEmail(userEmail)
                 .orElseThrow(() -> new UserNotFoundException("User not found."));
@@ -158,7 +158,7 @@ public class DefaultAuthService implements AuthService {
         }
     }
 
-    public String sendMessageForReset(String email) throws MessagingException {
+    public String sendMessageForResetPassword(String email) throws MessagingException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("user not found"));
         user.checkIfUserEnabled();
@@ -171,7 +171,7 @@ public class DefaultAuthService implements AuthService {
                         "password recovery link was already sent. Try again in 15 minutes");
             }
             passwordResetTokenRepository.deleteById(passwordResetToken.getId());
-            sendMessageForReset(email);
+            sendMessageForResetPassword(email);
         }
         String token = new ObjectId().toString();
         passwordResetTokenRepository.save(new PasswordResetToken(token,
@@ -183,7 +183,7 @@ public class DefaultAuthService implements AuthService {
         return "password recovery link has been successfully sent to this email";
     }
 
-    public String checkPasswordResetTokenAndUser(String token) {
+    public String processPasswordReset(String token) {
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findById(token)
                 .orElseThrow(() -> new TokenNotFoundException("not found password reset token"));
         if (!userRepository.existsByEmail(passwordResetToken.getEmail())) {
@@ -195,7 +195,7 @@ public class DefaultAuthService implements AuthService {
         return "enter a new password";
     }
 
-    public String resetPassword(String token, String newPassword) {
+    public String completePasswordReset(String token, String newPassword) {
         PasswordResetToken passwordResetToken = passwordResetTokenRepository.findById(token)
                 .orElseThrow(() -> new TokenNotFoundException("not found password reset token"));
         User user = userRepository.findByEmail(passwordResetToken.getEmail())

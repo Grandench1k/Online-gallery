@@ -37,7 +37,7 @@ public interface AuthController {
     @ApiResponse(responseCode = "500", description = "messaging exception occurred",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<AuthTokenResponse> startSignUp(
+    ResponseEntity<AuthTokenResponse> processSignUp(
             SignUpRequest request) throws MessagingException;
 
     @Operation(summary = "Complete sign up",
@@ -120,7 +120,7 @@ public interface AuthController {
     @ApiResponse(responseCode = "404", description = "user not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> passwordResetPage(String token);
+    ResponseEntity<OkResponse> startPasswordReset(String token);
 
     @Operation(summary = "Complete password reset",
             description = "completes the password reset process using the provided token and "

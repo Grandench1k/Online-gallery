@@ -57,7 +57,7 @@ public class DefaultExceptionHandler {
     @ExceptionHandler({UserNotFoundException.class,
             ImageNotFoundException.class,
             VideoNotFoundException.class})
-    public ResponseEntity<ExceptionResponse> handleNotFoundExceptionz(
+    public ResponseEntity<ExceptionResponse> handleNotFoundExceptions(
             RuntimeException e) {
         return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
     }

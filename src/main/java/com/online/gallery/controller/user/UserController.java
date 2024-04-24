@@ -28,7 +28,7 @@ public interface UserController {
     @ApiResponse(responseCode = "404", description = "no profile image found for the user",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<byte[]> getUserProfileImage(Authentication authentication);
+    ResponseEntity<byte[]> getProfileImage(Authentication authentication);
 
     @Operation(summary = "save profile image",
             description = "saves an profile image and returns the updated user data")
@@ -38,7 +38,7 @@ public interface UserController {
     @ApiResponse(responseCode = "404", description = "no existing profile image found to update",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> saveUserProfileImage(
+    ResponseEntity<OkResponse> saveProfileImage(
             MultipartFile profileImageFile,
             Authentication authentication) throws IOException;
 
@@ -50,7 +50,7 @@ public interface UserController {
     @ApiResponse(responseCode = "404", description = "no existing profile image found to update",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> updateUserProfileImage(
+    ResponseEntity<OkResponse> updateProfileImage(
             MultipartFile profileImageFile,
             Authentication authentication) throws IOException;
 
@@ -63,7 +63,7 @@ public interface UserController {
             "matches the old password",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> updateUserPassword(
+    ResponseEntity<OkResponse> updatePassword(
             PasswordUpdateRequest passwordUpdateRequest,
             Authentication authentication);
 }

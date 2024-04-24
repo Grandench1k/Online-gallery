@@ -14,16 +14,16 @@ import java.io.IOException;
 public interface AuthService {
     AuthTokenResponse processSignUp(SignUpRequest request) throws UserDuplicationException, MessagingException;
 
-    AuthTokenResponse authenticate(SignInRequest request) throws UsernameNotFoundException;
+    AuthTokenResponse signIn(SignInRequest request) throws UsernameNotFoundException;
 
     String completeSignUp(String token);
 
     void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
 
-    String sendMessageForReset(String token) throws MessagingException;
+    String sendMessageForResetPassword(String token) throws MessagingException;
 
-    String checkPasswordResetTokenAndUser(String token);
+    String processPasswordReset(String token);
 
-    String resetPassword(String token, String newPassword);
+    String completePasswordReset(String token, String newPassword);
 
 }

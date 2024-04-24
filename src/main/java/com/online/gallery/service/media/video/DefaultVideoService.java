@@ -35,7 +35,7 @@ public class DefaultVideoService implements VideoService {
         this.s3service = s3service;
     }
 
-    public String generateLinkWithUserIdForS3Videos(String userId) {
+    private String generateLinkWithUserIdForS3Videos(String userId) {
         return "videos/" + userId + "/";
     }
 
@@ -55,7 +55,7 @@ public class DefaultVideoService implements VideoService {
                 generateLinkWithUserIdForS3Videos(userId) + video.getFilePath());
     }
 
-    public String getFileFormat(MultipartFile videoFile) {
+    private String getFileFormat(MultipartFile videoFile) {
         String originalFilename = videoFile.getOriginalFilename();
         if (originalFilename == null || originalFilename.trim().isEmpty()) {
             throw new InvalidFilenameException("invalid filename");

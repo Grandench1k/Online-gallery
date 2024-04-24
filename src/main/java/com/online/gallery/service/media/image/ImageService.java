@@ -7,13 +7,10 @@ import java.io.IOException;
 import java.util.List;
 
 public interface ImageService {
-    String generateLinkWithUserIdForS3Images(String userId);
 
     List<Image> findAllImages(String userId);
 
     byte[] findImageById(String imageId, String userId);
-
-    void checkFileFormat(String originalFilename);
 
     Image saveImage(MultipartFile imageFile, Image image, String userId) throws IOException;
 

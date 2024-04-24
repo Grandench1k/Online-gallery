@@ -27,7 +27,7 @@ public interface ImageController {
     @ApiResponse(responseCode = "404", description = "no images found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<List<Image>> getAllImages(Authentication authentication);
+    ResponseEntity<List<Image>> listAllImages(Authentication authentication);
 
     @Operation(summary = "get image by id",
             description = "retrieves a specific image by its id for the authenticated user")

@@ -11,8 +11,6 @@ public interface UserService {
 
     User getUser(Authentication authentication);
 
-    String getFileFormat(MultipartFile videoFile);
-
     byte[] getProfileImage(User user);
 
     String saveProfileImage(MultipartFile profileImageFile, User user) throws IOException;

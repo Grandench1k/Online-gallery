@@ -1,7 +1,7 @@
 package com.online.gallery.controller.media.video;
 
 import com.online.gallery.model.media.Video;
-import com.online.gallery.service.media.video.DefaultVideoService;
+import com.online.gallery.service.media.video.VideoService;
 import com.online.gallery.service.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -16,19 +16,19 @@ import java.util.List;
 @RestController
 @RequestMapping("api/v1/videos")
 public class DefaultVideoController implements VideoController {
-    private final DefaultVideoService videoServiceImpl;
+    private final VideoService videoService;
     private final UserService userService;
 
-    public DefaultVideoController(DefaultVideoService videoServiceImpl, UserService userService) {
-        this.videoServiceImpl = videoServiceImpl;
+    public DefaultVideoController(VideoService videoService, UserService userService) {
+        this.videoService = videoService;
         this.userService = userService;
     }
 
     @GetMapping
-    public ResponseEntity<List<Video>> getAllVideos(Authentication authentication) {
+    public ResponseEntity<List<Video>> listAllVideos(Authentication authentication) {
         return ResponseEntity
                 .ok()
-                .body(videoServiceImpl.findAllVideos(userService.getUserId(authentication)));
+                .body(videoService.findAllVideos(userService.getUserId(authentication)));
     }
 
     @GetMapping(value = "/{videoId}", produces = {"video/mp4", "video/mpeg", "video/ogg"})
@@ -38,7 +38,7 @@ public class DefaultVideoController implements VideoController {
         return ResponseEntity
                 .ok()
                 .contentType(MediaType.valueOf("video/mp4"))
-                .body(videoServiceImpl.findVideoById(videoId, userService.getUserId(authentication)));
+                .body(videoService.findVideoById(videoId, userService.getUserId(authentication)));
     }
 
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
@@ -48,7 +48,7 @@ public class DefaultVideoController implements VideoController {
             Authentication authentication) throws IOException {
         return ResponseEntity
                 .ok()
-                .body(videoServiceImpl.saveVideo(video, videoFile, userService.getUserId(authentication)));
+                .body(videoService.saveVideo(video, videoFile, userService.getUserId(authentication)));
     }
 
     @PatchMapping("/{videoId}")
@@ -58,13 +58,13 @@ public class DefaultVideoController implements VideoController {
             Authentication authentication) {
         return ResponseEntity
                 .ok()
-                .body(videoServiceImpl.updateVideoById(videoId, video, userService.getUserId(authentication)));
+                .body(videoService.updateVideoById(videoId, video, userService.getUserId(authentication)));
     }
 
     @DeleteMapping("/{videoId}")
     public ResponseEntity<Video> deleteVideoById(@PathVariable String videoId, Authentication authentication) {
         return ResponseEntity
                 .ok()
-                .body(videoServiceImpl.deleteVideoById(videoId, userService.getUserId(authentication)));
+                .body(videoService.deleteVideoById(videoId, userService.getUserId(authentication)));
     }
 }

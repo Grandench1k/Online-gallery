@@ -20,30 +20,30 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/v1/auth")
 public class DefaultAuthController implements AuthController {
-    private final AuthService service;
+    private final AuthService authService;
 
-    public DefaultAuthController(AuthService service) {
-        this.service = service;
+    public DefaultAuthController(AuthService authService) {
+        this.authService = authService;
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<AuthTokenResponse> startSignUp(
+    public ResponseEntity<AuthTokenResponse> processSignUp(
             @RequestBody @Valid SignUpRequest request) throws MessagingException {
         return ResponseEntity
-                .ok(service.processSignUp(request));
+                .ok(authService.processSignUp(request));
     }
 
     @GetMapping("signup/{token}")
     public ResponseEntity<OkResponse> completeSignUp(@PathVariable String token) {
         return ResponseEntity
-                .ok(new OkResponse(service.completeSignUp(token)));
+                .ok(new OkResponse(authService.completeSignUp(token)));
     }
 
     @PostMapping("/signin")
     public ResponseEntity<AuthTokenResponse> signIn(
             @RequestBody @Valid SignInRequest request) {
         return ResponseEntity
-                .ok(service.authenticate(request));
+                .ok(authService.signIn(request));
     }
 
     @PostMapping("/logout")
@@ -56,7 +56,7 @@ public class DefaultAuthController implements AuthController {
     @PostMapping("/refresh")
     public void refreshToken(HttpServletRequest request,
                              HttpServletResponse response) throws IOException {
-        service.refreshToken(request, response);
+        authService.refreshToken(request, response);
     }
 
     @PostMapping("password")
@@ -64,13 +64,13 @@ public class DefaultAuthController implements AuthController {
             @RequestBody @Valid PasswordResetStartRequest passwordResetStartRequest
     ) throws MessagingException {
         return ResponseEntity
-                .ok(new OkResponse(service.sendMessageForReset(passwordResetStartRequest.getEmail())));
+                .ok(new OkResponse(authService.sendMessageForResetPassword(passwordResetStartRequest.getEmail())));
     }
 
     @GetMapping("password/{token}")
-    public ResponseEntity<OkResponse> passwordResetPage(@PathVariable String token) {
+    public ResponseEntity<OkResponse> startPasswordReset(@PathVariable String token) {
         return ResponseEntity
-                .ok(new OkResponse(service.checkPasswordResetTokenAndUser(token)));
+                .ok(new OkResponse(authService.processPasswordReset(token)));
     }
 
     @PostMapping("password/{token}")
@@ -78,7 +78,7 @@ public class DefaultAuthController implements AuthController {
             @PathVariable String token,
             @RequestBody @Valid PasswordResetCompleteRequest passwordResetCompleteRequest) {
         return ResponseEntity
-                .ok(new OkResponse(service.resetPassword(token,
+                .ok(new OkResponse(authService.completePasswordReset(token,
                         passwordResetCompleteRequest.getPassword())));
     }
 }

@@ -36,7 +36,7 @@ public class DefaultImageService implements ImageService {
         this.s3service = s3service;
     }
 
-    public String generateLinkWithUserIdForS3Images(String userId) {
+    private String generateLinkWithUserIdForS3Images(String userId) {
         return "images/" + userId + "/";
     }
 
@@ -55,7 +55,7 @@ public class DefaultImageService implements ImageService {
         return s3service.getObject(bucketName, generateLinkWithUserIdForS3Images(userId) + image.getFilePath());
     }
 
-    public void checkFileFormat(String originalFilename) {
+    private void checkFileFormat(String originalFilename) {
         if (originalFilename == null || originalFilename.trim().isEmpty()) {
             throw new InvalidFilenameException("invalid filename");
         }

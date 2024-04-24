@@ -25,7 +25,7 @@ public class DefaultImageController implements ImageController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Image>> getAllImages(Authentication authentication) {
+    public ResponseEntity<List<Image>> listAllImages(Authentication authentication) {
         return ResponseEntity
                 .ok()
                 .body(imageService.findAllImages(userService.getUserId(authentication)));

@@ -7,13 +7,10 @@ import java.io.IOException;
 import java.util.List;
 
 public interface VideoService {
-    String generateLinkWithUserIdForS3Videos(String userId);
 
     List<Video> findAllVideos(String userId);
 
     byte[] findVideoById(String videoId, String userId);
-
-    String getFileFormat(MultipartFile imageFile);
 
     Video saveVideo(Video videoToSave, MultipartFile videoFile, String userId) throws IOException;
 
