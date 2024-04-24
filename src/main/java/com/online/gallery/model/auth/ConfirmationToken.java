@@ -19,7 +19,7 @@ public class ConfirmationToken {
     public ConfirmationToken(String id, String userId) {
         this.id = id;
         this.userId = userId;
-        LocalDateTime.now().plusMinutes(15);
+        this.expiredAt = LocalDateTime.now().plusMinutes(15);
     }
 
     public boolean isExpired() {

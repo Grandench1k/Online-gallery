@@ -29,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class TestAuthController {
+    private final String userId = new ObjectId().toString();
     @Autowired
     private JwtService jwtService;
     @Autowired
@@ -39,11 +40,8 @@ public class TestAuthController {
     private ConfirmationTokenRepository confirmationTokenRepository;
     private String jwtToken;
     private String refreshToken;
-
     @Autowired
     private MockMvc mockMvc;
-
-    private final String userId = new ObjectId().toString();
     @Autowired
     private PasswordResetTokenRepository passwordResetTokenRepository;
 

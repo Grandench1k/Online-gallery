@@ -19,7 +19,7 @@ public class PasswordResetToken {
     public PasswordResetToken(String id, String email) {
         this.id = id;
         this.email = email;
-        setExpiredAt(LocalDateTime.now().plusMinutes(15));
+        this.expiredAt = LocalDateTime.now().plusMinutes(15);
     }
 
     public boolean isExpired() {

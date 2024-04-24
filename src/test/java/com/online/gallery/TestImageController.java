@@ -31,6 +31,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class TestImageController {
+    static String fileName = "src/test/resources/static/image.jpg";
+    static String absolutePath;
+    private final String userId = new ObjectId().toString();
+    private final String imageId = "id";
     @Autowired
     private S3service s3service;
     @Value("${aws.s3.buckets.main-bucket}")
@@ -44,18 +48,22 @@ public class TestImageController {
     @Autowired
     private ImageRepository imageRepository;
     private String accessToken;
-
     @Autowired
     private MockMvc mockMvc;
 
-    private final String userId = new ObjectId().toString();
+    @BeforeAll
+    static void createImage() throws IOException {
+        File image = new File(fileName);
+        image.createNewFile();
+        absolutePath = image.getAbsolutePath();
+        System.out.println("created new file in " + absolutePath);
+    }
 
-    private final String imageId = "id";
-
-
-    static String fileName = "src/test/resources/static/image.jpg";
-
-    static String absolutePath;
+    @AfterAll
+    static void deleteImage() throws IOException {
+        Files.delete(Path.of(absolutePath));
+        System.out.println("deleted file in" + absolutePath);
+    }
 
     @BeforeEach
     void setUp() throws IOException {
@@ -74,20 +82,6 @@ public class TestImageController {
         imageRepository.deleteById(imageId);
         userRepository.deleteById(userId);
         s3service.deleteObject(bucketName, "image/" + userId + "/" + fileName);
-    }
-
-    @BeforeAll
-    static void createImage() throws IOException {
-        File image = new File(fileName);
-        image.createNewFile();
-        absolutePath = image.getAbsolutePath();
-        System.out.println("created new file in " + absolutePath);
-    }
-
-    @AfterAll
-    static void deleteImage() throws IOException {
-        Files.delete(Path.of(absolutePath));
-        System.out.println("deleted file in" + absolutePath);
     }
 
     @Test

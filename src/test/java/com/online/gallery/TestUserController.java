@@ -29,6 +29,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class TestUserController {
+    static String fileName = "src/test/resources/static/profileImage.jpg";
+    static String absolutePath;
+    private final String userId = new ObjectId().toString();
     @Autowired
     private S3service s3service;
     @Value("${aws.s3.buckets.main-bucket}")
@@ -40,15 +43,22 @@ public class TestUserController {
     @Autowired
     private ApplicationConfiguration applicationConfiguration;
     private String jwtToken;
-
     @Autowired
     private MockMvc mockMvc;
 
-    private final String userId = new ObjectId().toString();
+    @BeforeAll
+    static void createProfileImage() throws IOException {
+        File image = new File(fileName);
+        image.createNewFile();
+        absolutePath = image.getAbsolutePath();
+        System.out.println("created new file in " + absolutePath);
+    }
 
-    static String fileName = "src/test/resources/static/profileImage.jpg";
-
-    static String absolutePath;
+    @AfterAll
+    static void deleteProfileImage() throws IOException {
+        Files.delete(Path.of(absolutePath));
+        System.out.println("deleted file in" + absolutePath);
+    }
 
     @BeforeEach
     void setUp() throws IOException {
@@ -65,20 +75,6 @@ public class TestUserController {
     void tearDown() {
         userRepository.deleteById(userId);
         s3service.deleteObject(bucketName, "profileImages/" + userId + "/" + fileName);
-    }
-
-    @BeforeAll
-    static void createProfileImage() throws IOException {
-        File image = new File(fileName);
-        image.createNewFile();
-        absolutePath = image.getAbsolutePath();
-        System.out.println("created new file in " + absolutePath);
-    }
-
-    @AfterAll
-    static void deleteProfileImage() throws IOException {
-        Files.delete(Path.of(absolutePath));
-        System.out.println("deleted file in" + absolutePath);
     }
 
     @Test

@@ -30,6 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 public class TestVideoController {
+    private static final String fileName = "video.mp4";
+    private static String absolutePath;
+    private final String userId = new ObjectId().toString();
+    private final String videoId = "id";
     @Autowired
     private S3service s3service;
     @Value("${aws.s3.buckets.main-bucket}")
@@ -43,17 +47,22 @@ public class TestVideoController {
     @Autowired
     private VideoRepository videoRepository;
     private String jwtToken;
-
     @Autowired
     private MockMvc mockMvc;
 
-    private final String userId = new ObjectId().toString();
+    @BeforeAll
+    static void createVideo() throws IOException {
+        File video = new File(fileName);
+        video.createNewFile();
+        absolutePath = video.getAbsolutePath();
+        System.out.println("created new file in " + absolutePath);
+    }
 
-    private static final String fileName = "video.mp4";
-
-    private static String absolutePath;
-
-    private final String videoId = "id";
+    @AfterAll
+    static void deleteVideo() throws IOException {
+        Files.delete(Path.of(absolutePath));
+        System.out.println("deleted file in" + absolutePath);
+    }
 
     @BeforeEach
     void setUp() throws IOException {
@@ -72,20 +81,6 @@ public class TestVideoController {
         videoRepository.deleteById(videoId);
         userRepository.deleteById(userId);
         s3service.deleteObject(bucketName, "videos/" + userId + "/" + fileName);
-    }
-
-    @BeforeAll
-    static void createVideo() throws IOException {
-        File video = new File(fileName);
-        video.createNewFile();
-        absolutePath = video.getAbsolutePath();
-        System.out.println("created new file in " + absolutePath);
-    }
-
-    @AfterAll
-    static void deleteVideo() throws IOException {
-        Files.delete(Path.of(absolutePath));
-        System.out.println("deleted file in" + absolutePath);
     }
 
     @Test
