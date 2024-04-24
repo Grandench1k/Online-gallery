@@ -5,7 +5,7 @@ import com.online.gallery.dto.request.PasswordResetStartRequest;
 import com.online.gallery.dto.request.SignInRequest;
 import com.online.gallery.dto.request.SignUpRequest;
 import com.online.gallery.dto.response.AuthTokenResponse;
-import com.online.gallery.dto.response.OkResponse;
+import com.online.gallery.dto.response.MessageResponse;
 import com.online.gallery.service.auth.AuthService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,9 +34,9 @@ public class DefaultAuthController implements AuthController {
     }
 
     @GetMapping("signup/{token}")
-    public ResponseEntity<OkResponse> completeSignUp(@PathVariable String token) {
+    public ResponseEntity<MessageResponse> completeSignUp(@PathVariable String token) {
         return ResponseEntity
-                .ok(new OkResponse(authService.completeSignUp(token)));
+                .ok(new MessageResponse(authService.completeSignUp(token)));
     }
 
     @PostMapping("/signin")
@@ -47,10 +47,10 @@ public class DefaultAuthController implements AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<OkResponse> logOut() {
+    public ResponseEntity<MessageResponse> logOut() {
         SecurityContextHolder.clearContext();
         return ResponseEntity
-                .ok(new OkResponse("successful logout"));
+                .ok(new MessageResponse("successful logout"));
     }
 
     @PostMapping("/refresh")
@@ -60,25 +60,25 @@ public class DefaultAuthController implements AuthController {
     }
 
     @PostMapping("password")
-    public ResponseEntity<OkResponse> forgotPassword(
+    public ResponseEntity<MessageResponse> forgotPassword(
             @RequestBody @Valid PasswordResetStartRequest passwordResetStartRequest
     ) throws MessagingException {
         return ResponseEntity
-                .ok(new OkResponse(authService.sendMessageForResetPassword(passwordResetStartRequest.getEmail())));
+                .ok(new MessageResponse(authService.sendMessageForResetPassword(passwordResetStartRequest.getEmail())));
     }
 
     @GetMapping("password/{token}")
-    public ResponseEntity<OkResponse> startPasswordReset(@PathVariable String token) {
+    public ResponseEntity<MessageResponse> startPasswordReset(@PathVariable String token) {
         return ResponseEntity
-                .ok(new OkResponse(authService.processPasswordReset(token)));
+                .ok(new MessageResponse(authService.processPasswordReset(token)));
     }
 
     @PostMapping("password/{token}")
-    public ResponseEntity<OkResponse> completePasswordReset(
+    public ResponseEntity<MessageResponse> completePasswordReset(
             @PathVariable String token,
             @RequestBody @Valid PasswordResetCompleteRequest passwordResetCompleteRequest) {
         return ResponseEntity
-                .ok(new OkResponse(authService.completePasswordReset(token,
+                .ok(new MessageResponse(authService.completePasswordReset(token,
                         passwordResetCompleteRequest.getPassword())));
     }
 }

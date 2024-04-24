@@ -2,7 +2,7 @@ package com.online.gallery.controller.user;
 
 import com.online.gallery.dto.request.PasswordUpdateRequest;
 import com.online.gallery.dto.response.ExceptionResponse;
-import com.online.gallery.dto.response.OkResponse;
+import com.online.gallery.dto.response.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,11 +34,11 @@ public interface UserController {
             description = "saves an profile image and returns the updated user data")
     @ApiResponse(responseCode = "200", description = "update URL generated successfully",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = OkResponse.class)))
+                    schema = @Schema(implementation = MessageResponse.class)))
     @ApiResponse(responseCode = "404", description = "no existing profile image found to update",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> saveProfileImage(
+    ResponseEntity<MessageResponse> saveProfileImage(
             MultipartFile profileImageFile,
             Authentication authentication) throws IOException;
 
@@ -46,11 +46,11 @@ public interface UserController {
             description = "updates an profile image and returns the updated user data")
     @ApiResponse(responseCode = "200", description = "update URL generated successfully",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = OkResponse.class)))
+                    schema = @Schema(implementation = MessageResponse.class)))
     @ApiResponse(responseCode = "404", description = "no existing profile image found to update",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> updateProfileImage(
+    ResponseEntity<MessageResponse> updateProfileImage(
             MultipartFile profileImageFile,
             Authentication authentication) throws IOException;
 
@@ -58,12 +58,12 @@ public interface UserController {
             description = "updates the user's password after validating the old password")
     @ApiResponse(responseCode = "200", description = "password updated successfully",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = OkResponse.class)))
+                    schema = @Schema(implementation = MessageResponse.class)))
     @ApiResponse(responseCode = "400", description = "invalid old password provided or new password " +
             "matches the old password",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> updatePassword(
+    ResponseEntity<MessageResponse> updatePassword(
             PasswordUpdateRequest passwordUpdateRequest,
             Authentication authentication);
 }

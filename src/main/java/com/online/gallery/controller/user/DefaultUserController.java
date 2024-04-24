@@ -1,7 +1,7 @@
 package com.online.gallery.controller.user;
 
 import com.online.gallery.dto.request.PasswordUpdateRequest;
-import com.online.gallery.dto.response.OkResponse;
+import com.online.gallery.dto.response.MessageResponse;
 import com.online.gallery.service.user.UserService;
 import jakarta.validation.Valid;
 import org.springframework.http.MediaType;
@@ -32,36 +32,33 @@ public class DefaultUserController implements UserController {
     }
 
     @PostMapping(value = "/profileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<OkResponse> saveProfileImage(
+    public ResponseEntity<MessageResponse> saveProfileImage(
             @RequestPart MultipartFile profileImageFile,
             Authentication authentication) throws IOException {
         return ResponseEntity
-                .ok()
-                .body(new OkResponse(
+                .ok(new MessageResponse(
                         userService.saveProfileImage(
                                 profileImageFile,
                                 userService.getUser(authentication))));
     }
 
     @PatchMapping(value = "/profileImage", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<OkResponse> updateProfileImage(
+    public ResponseEntity<MessageResponse> updateProfileImage(
             @RequestPart MultipartFile profileImageFile,
             Authentication authentication) throws IOException {
         return ResponseEntity
-                .ok()
-                .body(new OkResponse(
+                .ok(new MessageResponse(
                         userService.updateProfileImage(
                                 profileImageFile,
                                 userService.getUser(authentication))));
     }
 
     @PatchMapping(value = "/password", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<OkResponse> updatePassword(
+    public ResponseEntity<MessageResponse> updatePassword(
             @RequestBody @Valid PasswordUpdateRequest request,
             Authentication authentication) {
         return ResponseEntity
-                .ok()
-                .body(new OkResponse(userService.updateUserPassword(
+                .ok(new MessageResponse(userService.updateUserPassword(
                         request.getOldPassword(),
                         request.getNewPassword(),
                         userService.getUser(authentication))));

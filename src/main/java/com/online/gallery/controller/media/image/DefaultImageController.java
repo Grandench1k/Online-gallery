@@ -1,5 +1,6 @@
 package com.online.gallery.controller.media.image;
 
+import com.online.gallery.dto.response.DataResponse;
 import com.online.gallery.model.media.Image;
 import com.online.gallery.service.media.image.ImageService;
 import com.online.gallery.service.user.UserService;
@@ -25,10 +26,9 @@ public class DefaultImageController implements ImageController {
     }
 
     @GetMapping
-    public ResponseEntity<List<Image>> listAllImages(Authentication authentication) {
+    public ResponseEntity<DataResponse<List<Image>>> listAllImages(Authentication authentication) {
         return ResponseEntity
-                .ok()
-                .body(imageService.findAllImages(userService.getUserId(authentication)));
+                .ok(new DataResponse<>(imageService.findAllImages(userService.getUserId(authentication))));
     }
 
     @GetMapping(value = "/{imageId}",
@@ -40,40 +40,36 @@ public class DefaultImageController implements ImageController {
                     "image/bmp",
                     "image/jpg",
                     "image/webp"})
-    public ResponseEntity<byte[]> getImageById(
+    public ResponseEntity<DataResponse<byte[]>> getImageById(
             @PathVariable String imageId,
             Authentication authentication) {
         return ResponseEntity
-                .ok()
-                .body(imageService.findImageById(imageId, userService.getUserId(authentication)));
+                .ok(new DataResponse<>(imageService.findImageById(imageId, userService.getUserId(authentication))));
     }
 
     @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<Image> saveImage(
+    public ResponseEntity<DataResponse<Image>> saveImage(
             @RequestPart @Valid Image image,
             @RequestPart MultipartFile imageFile,
             Authentication authentication) throws IOException {
         return ResponseEntity
-                .ok()
-                .body(imageService.saveImage(imageFile, image, userService.getUserId(authentication)));
+                .ok(new DataResponse<>(imageService.saveImage(imageFile, image, userService.getUserId(authentication))));
     }
 
     @PatchMapping("/{imageId}")
-    public ResponseEntity<Image> updateImageById(
+    public ResponseEntity<DataResponse<Image>> updateImageById(
             @PathVariable String imageId,
             @RequestBody @Valid Image image,
             Authentication authentication) {
         return ResponseEntity
-                .ok()
-                .body(imageService.updateImageById(imageId, image, userService.getUserId(authentication)));
+                .ok(new DataResponse<>(imageService.updateImageById(imageId, image, userService.getUserId(authentication))));
     }
 
     @DeleteMapping("/{imageId}")
-    public ResponseEntity<Image> deleteImageById(
+    public ResponseEntity<DataResponse<Image>> deleteImageById(
             @PathVariable String imageId,
             Authentication authentication) {
         return ResponseEntity
-                .ok()
-                .body(imageService.deleteImageById(imageId, userService.getUserId(authentication)));
+                .ok(new DataResponse<>(imageService.deleteImageById(imageId, userService.getUserId(authentication))));
     }
 }

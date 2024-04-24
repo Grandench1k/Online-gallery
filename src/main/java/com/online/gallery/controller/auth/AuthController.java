@@ -6,7 +6,7 @@ import com.online.gallery.dto.request.SignInRequest;
 import com.online.gallery.dto.request.SignUpRequest;
 import com.online.gallery.dto.response.AuthTokenResponse;
 import com.online.gallery.dto.response.ExceptionResponse;
-import com.online.gallery.dto.response.OkResponse;
+import com.online.gallery.dto.response.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -52,7 +52,7 @@ public interface AuthController {
     @ApiResponse(responseCode = "404", description = "token or user not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> completeSignUp(String token);
+    ResponseEntity<MessageResponse> completeSignUp(String token);
 
     @Operation(summary = "Sign in",
             description = "authenticates the user with provided credentials and returns "
@@ -74,8 +74,8 @@ public interface AuthController {
             description = "logs out the current user by clearing the security context")
     @ApiResponse(responseCode = "200", description = "successfully logged out",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = OkResponse.class)))
-    ResponseEntity<OkResponse> logOut();
+                    schema = @Schema(implementation = MessageResponse.class)))
+    ResponseEntity<MessageResponse> logOut();
 
 
     @Operation(summary = "Refresh access token",
@@ -98,14 +98,14 @@ public interface AuthController {
                     + "user's email")
     @ApiResponse(responseCode = "200", description = "password reset link sent successfully",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = OkResponse.class)))
+                    schema = @Schema(implementation = MessageResponse.class)))
     @ApiResponse(responseCode = "400", description = "account not activated or email not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
     @ApiResponse(responseCode = "404", description = "user not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> forgotPassword(
+    ResponseEntity<MessageResponse> forgotPassword(
             PasswordResetStartRequest passwordResetStartRequest) throws MessagingException;
 
     @Operation(summary = "Start password reset",
@@ -113,21 +113,21 @@ public interface AuthController {
                     + "user's email")
     @ApiResponse(responseCode = "200", description = "password reset link sent successfully",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = OkResponse.class)))
+                    schema = @Schema(implementation = MessageResponse.class)))
     @ApiResponse(responseCode = "400", description = "account not activated or email not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
     @ApiResponse(responseCode = "404", description = "user not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> startPasswordReset(String token);
+    ResponseEntity<MessageResponse> startPasswordReset(String token);
 
     @Operation(summary = "Complete password reset",
             description = "completes the password reset process using the provided token and "
                     + "new password")
     @ApiResponse(responseCode = "200", description = "password reset successfully",
             content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = OkResponse.class)))
+                    schema = @Schema(implementation = MessageResponse.class)))
     @ApiResponse(responseCode = "400", description = "invalid or expired token, or passwords "
             + "match the old password",
             content = @Content(mediaType = "application/json",
@@ -135,7 +135,7 @@ public interface AuthController {
     @ApiResponse(responseCode = "404", description = "token or user not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<OkResponse> completePasswordReset(
+    ResponseEntity<MessageResponse> completePasswordReset(
             String token,
             PasswordResetCompleteRequest passwordResetCompleteRequest);
 }
