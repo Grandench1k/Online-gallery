@@ -33,10 +33,10 @@ public class DefaultAuthController implements AuthController {
                 .ok(authService.processSignUp(request));
     }
 
-    @GetMapping("signup/{token}")
-    public ResponseEntity<MessageResponse> completeSignUp(@PathVariable String token) {
+    @GetMapping("verify/{token}")
+    public ResponseEntity<AuthTokenResponse> completeSignUp(@PathVariable String token) {
         return ResponseEntity
-                .ok(new MessageResponse(authService.completeSignUp(token)));
+                .ok(authService.completeSignUp(token));
     }
 
     @PostMapping("/signin")

@@ -93,7 +93,7 @@ public class TestAuthController {
                 }""";
         //When
         mockMvc.perform(MockMvcRequestBuilders.post("/api/v1/auth/signup").content(body).contentType("application/json"));
-        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/auth/signup/" + "id"));
+        ResultActions response = mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/auth/verify/" + "id"));
 
         //Then
         response.andExpect(status().isOk());

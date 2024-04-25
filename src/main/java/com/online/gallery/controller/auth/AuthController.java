@@ -52,7 +52,7 @@ public interface AuthController {
     @ApiResponse(responseCode = "404", description = "token or user not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<MessageResponse> completeSignUp(String token);
+    ResponseEntity<AuthTokenResponse> completeSignUp(String token);
 
     @Operation(summary = "Sign in",
             description = "authenticates the user with provided credentials and returns "
