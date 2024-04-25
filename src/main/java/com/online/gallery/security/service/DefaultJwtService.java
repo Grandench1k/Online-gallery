@@ -57,7 +57,9 @@ public class DefaultJwtService implements JwtService {
     ) {
         return Jwts
                 .builder()
-                .claims(extractClaims).subject(userDetails.getUsername()).issuedAt(new Date(System.currentTimeMillis())).expiration(new Date(System.currentTimeMillis() + tokenExpirationDate * 60 * 30))
+                .claims(extractClaims).subject(userDetails.getUsername())
+                .issuedAt(new Date(System.currentTimeMillis()))
+                .expiration(new Date(System.currentTimeMillis() + tokenExpirationDate * 60 * 30))
                 .signWith(getSignInKey())
                 .compact();
     }

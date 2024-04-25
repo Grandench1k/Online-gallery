@@ -20,7 +20,9 @@ public interface JWTAuthFilter extends Filter {
     }
 
     @Override
-    void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException;
+    void doFilter(ServletRequest servletRequest,
+                  ServletResponse servletResponse,
+                  FilterChain filterChain) throws IOException, ServletException;
 
     @Override
     default void destroy() {
