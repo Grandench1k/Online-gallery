@@ -5,9 +5,9 @@ import com.online.gallery.model.auth.ConfirmationToken;
 import com.online.gallery.model.auth.PasswordResetToken;
 import com.online.gallery.model.user.Role;
 import com.online.gallery.model.user.User;
-import com.online.gallery.repository.auth.ConfirmationTokenRepository;
-import com.online.gallery.repository.auth.PasswordResetTokenRepository;
-import com.online.gallery.repository.user.UserRepository;
+import com.online.gallery.repository.auth.ConfirmationTokenRepo;
+import com.online.gallery.repository.auth.PasswordResetTokenRepo;
+import com.online.gallery.repository.user.UserRepo;
 import com.online.gallery.security.configuration.ApplicationConfiguration;
 import com.online.gallery.security.service.JwtService;
 import org.bson.types.ObjectId;
@@ -33,40 +33,40 @@ public class TestAuthController {
     @Autowired
     private JwtService jwtService;
     @Autowired
-    private UserRepository userRepository;
+    private UserRepo userRepo;
     @Autowired
     private ApplicationConfiguration applicationConfiguration;
     @Autowired
-    private ConfirmationTokenRepository confirmationTokenRepository;
+    private ConfirmationTokenRepo confirmationTokenRepo;
     private String jwtToken;
     private String refreshToken;
     @Autowired
     private MockMvc mockMvc;
     @Autowired
-    private PasswordResetTokenRepository passwordResetTokenRepository;
+    private PasswordResetTokenRepo passwordResetTokenRepo;
 
     @BeforeEach
     void setUp() {
         String encodedPassword = applicationConfiguration.passwordEncoder().encode("example");
         User user = User.builder().nickname("firstname").email("exapmle@mail.org").role(Role.USER).id(userId).password(encodedPassword).build();
         ConfirmationToken confirmationToken = new ConfirmationToken("id", userId);
-        confirmationTokenRepository.save(confirmationToken);
+        confirmationTokenRepo.save(confirmationToken);
         user.setEnabled(true);
-        userRepository.save(user);
+        userRepo.save(user);
         jwtToken = jwtService.generateAccessToken(user);
         jwtToken = jwtService.generateRefreshToken(user);
     }
 
     @AfterEach
     void tearDown() {
-        Optional<ConfirmationToken> confirmationToken = confirmationTokenRepository.findByUserId(userId);
-        confirmationToken.ifPresent(value -> confirmationTokenRepository.delete(value));
-        Optional<PasswordResetToken> passwordResetToken = passwordResetTokenRepository.findByEmail("exapmle@mail.org");
-        passwordResetToken.ifPresent(value -> passwordResetTokenRepository.delete(value));
-        Optional<User> user = userRepository.findByEmail("exapmle@mail.org");
-        user.ifPresent(value -> userRepository.delete(value));
-        Optional<User> user2 = userRepository.findByEmail("exapmle2@mail.org");
-        user2.ifPresent(value -> userRepository.delete(value));
+        Optional<ConfirmationToken> confirmationToken = confirmationTokenRepo.findByUserId(userId);
+        confirmationToken.ifPresent(value -> confirmationTokenRepo.delete(value));
+        Optional<PasswordResetToken> passwordResetToken = passwordResetTokenRepo.findByEmail("exapmle@mail.org");
+        passwordResetToken.ifPresent(value -> passwordResetTokenRepo.delete(value));
+        Optional<User> user = userRepo.findByEmail("exapmle@mail.org");
+        user.ifPresent(value -> userRepo.delete(value));
+        Optional<User> user2 = userRepo.findByEmail("exapmle2@mail.org");
+        user2.ifPresent(value -> userRepo.delete(value));
     }
 
     @Test
@@ -138,7 +138,7 @@ public class TestAuthController {
         String id = "id";
         PasswordResetToken passwordResetToken =
                 new PasswordResetToken(id, "exapmle@mail.org");
-        passwordResetTokenRepository.save(passwordResetToken);
+        passwordResetTokenRepo.save(passwordResetToken);
         String body = """
                 {
                     "password": "example123"

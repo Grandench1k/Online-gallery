@@ -4,8 +4,8 @@ package com.online.gallery;
 import com.online.gallery.model.media.Image;
 import com.online.gallery.model.user.Role;
 import com.online.gallery.model.user.User;
-import com.online.gallery.repository.media.ImageRepository;
-import com.online.gallery.repository.user.UserRepository;
+import com.online.gallery.repository.media.ImageRepo;
+import com.online.gallery.repository.user.UserRepo;
 import com.online.gallery.security.configuration.ApplicationConfiguration;
 import com.online.gallery.security.service.JwtService;
 import com.online.gallery.storage.s3.service.S3service;
@@ -42,11 +42,11 @@ public class TestImageController {
     @Autowired
     private JwtService jwtService;
     @Autowired
-    private UserRepository userRepository;
+    private UserRepo userRepo;
     @Autowired
     private ApplicationConfiguration applicationConfiguration;
     @Autowired
-    private ImageRepository imageRepository;
+    private ImageRepo imageRepo;
     private String accessToken;
     @Autowired
     private MockMvc mockMvc;
@@ -72,15 +72,15 @@ public class TestImageController {
         user.setEnabled(true);
         byte[] file = Files.readAllBytes(Path.of(absolutePath));
         s3service.putObject(bucketName, "images/" + userId + "/" + fileName, file);
-        userRepository.save(user);
+        userRepo.save(user);
         accessToken = jwtService.generateAccessToken(user);
-        imageRepository.save(new Image(imageId, "image", fileName, userId));
+        imageRepo.save(new Image(imageId, "image", fileName, userId));
     }
 
     @AfterEach
     void tearDown() {
-        imageRepository.deleteById(imageId);
-        userRepository.deleteById(userId);
+        imageRepo.deleteById(imageId);
+        userRepo.deleteById(userId);
         s3service.deleteObject(bucketName, "image/" + userId + "/" + fileName);
     }
 

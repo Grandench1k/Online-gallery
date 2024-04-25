@@ -3,8 +3,8 @@ package com.online.gallery;
 import com.online.gallery.model.media.Video;
 import com.online.gallery.model.user.Role;
 import com.online.gallery.model.user.User;
-import com.online.gallery.repository.media.VideoRepository;
-import com.online.gallery.repository.user.UserRepository;
+import com.online.gallery.repository.media.VideoRepo;
+import com.online.gallery.repository.user.UserRepo;
 import com.online.gallery.security.configuration.ApplicationConfiguration;
 import com.online.gallery.security.service.JwtService;
 import com.online.gallery.storage.s3.service.S3service;
@@ -41,11 +41,11 @@ public class TestVideoController {
     @Autowired
     private JwtService jwtService;
     @Autowired
-    private UserRepository userRepository;
+    private UserRepo userRepo;
     @Autowired
     private ApplicationConfiguration applicationConfiguration;
     @Autowired
-    private VideoRepository videoRepository;
+    private VideoRepo videoRepo;
     private String jwtToken;
     @Autowired
     private MockMvc mockMvc;
@@ -71,15 +71,15 @@ public class TestVideoController {
         user.setEnabled(true);
         byte[] file = Files.readAllBytes(Path.of(absolutePath));
         s3service.putObject(bucketName, "videos/" + userId + "/" + fileName, file);
-        userRepository.save(user);
+        userRepo.save(user);
         jwtToken = jwtService.generateAccessToken(user);
-        videoRepository.save(videoRepository.save(new Video(videoId, "video", fileName, userId)));
+        videoRepo.save(videoRepo.save(new Video(videoId, "video", fileName, userId)));
     }
 
     @AfterEach
     void tearDown() {
-        videoRepository.deleteById(videoId);
-        userRepository.deleteById(userId);
+        videoRepo.deleteById(videoId);
+        userRepo.deleteById(userId);
         s3service.deleteObject(bucketName, "videos/" + userId + "/" + fileName);
     }
 

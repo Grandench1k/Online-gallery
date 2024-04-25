@@ -2,7 +2,7 @@ package com.online.gallery;
 
 import com.online.gallery.model.user.Role;
 import com.online.gallery.model.user.User;
-import com.online.gallery.repository.user.UserRepository;
+import com.online.gallery.repository.user.UserRepo;
 import com.online.gallery.security.configuration.ApplicationConfiguration;
 import com.online.gallery.security.service.JwtService;
 import com.online.gallery.storage.s3.service.S3service;
@@ -39,7 +39,7 @@ public class TestUserController {
     @Autowired
     private JwtService jwtService;
     @Autowired
-    private UserRepository userRepository;
+    private UserRepo userRepo;
     @Autowired
     private ApplicationConfiguration applicationConfiguration;
     private String jwtToken;
@@ -67,13 +67,13 @@ public class TestUserController {
         user.setEnabled(true);
         byte[] file = Files.readAllBytes(Path.of(absolutePath));
         s3service.putObject(bucketName, "profileImages/" + userId + "/" + fileName, file);
-        userRepository.save(user);
+        userRepo.save(user);
         jwtToken = jwtService.generateAccessToken(user);
     }
 
     @AfterEach
     void tearDown() {
-        userRepository.deleteById(userId);
+        userRepo.deleteById(userId);
         s3service.deleteObject(bucketName, "profileImages/" + userId + "/" + fileName);
     }
 
