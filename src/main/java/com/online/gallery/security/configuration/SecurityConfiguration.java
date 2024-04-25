@@ -17,12 +17,15 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
     private final JWTAuthFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
-    private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
+    private final String[] publicRequests = {"/api/v1/auth/**",
+            "/online-gallery-docs/**",
+            "/swagger-ui.html",
+            "/swagger-ui/**"};
 
-    public SecurityConfiguration(JWTAuthFilter jwtAuthFilter, AuthenticationProvider authenticationProvider, JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint) {
+    public SecurityConfiguration(JWTAuthFilter jwtAuthFilter,
+                                 AuthenticationProvider authenticationProvider) {
         this.jwtAuthFilter = jwtAuthFilter;
         this.authenticationProvider = authenticationProvider;
-        this.jwtAuthenticationEntryPoint = jwtAuthenticationEntryPoint;
     }
 
     @Bean
@@ -30,19 +33,16 @@ public class SecurityConfiguration {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(
-                        authorizationManagerRequestMatcherRegistry -> authorizationManagerRequestMatcherRegistry
-                                .requestMatchers("/api/v1/auth/**",
-                                        "/online-gallery-docs/**",
-                                        "/swagger-ui.html",
-                                        "/swagger-ui/**")
-                                .permitAll()
-                                .anyRequest()
-                                .authenticated())
-                .exceptionHandling(
-                        httpSecurityExceptionHandlingConfigurer -> httpSecurityExceptionHandlingConfigurer
-                                .authenticationEntryPoint(jwtAuthenticationEntryPoint))
-                .sessionManagement(httpSecuritySessionManagementConfigurer -> httpSecuritySessionManagementConfigurer
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                        authorizationManagerRequestMatcherRegistry ->
+                                authorizationManagerRequestMatcherRegistry
+                                        .requestMatchers(publicRequests)
+                                        .permitAll()
+                                        .anyRequest()
+                                        .authenticated())
+                .sessionManagement(
+                        httpSecuritySessionManagementConfigurer ->
+                                httpSecuritySessionManagementConfigurer
+                                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
