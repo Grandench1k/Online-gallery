@@ -6,6 +6,7 @@ import com.online.gallery.dto.request.SignUpRequest;
 import com.online.gallery.dto.response.AuthTokenResponse;
 import com.online.gallery.exception.auth.TokenDuplicationException;
 import com.online.gallery.exception.auth.TokenExpirationException;
+import com.online.gallery.exception.auth.TokenInvalidException;
 import com.online.gallery.exception.auth.TokenNotFoundException;
 import com.online.gallery.exception.user.PasswordsMatchException;
 import com.online.gallery.exception.user.UserDuplicationException;
@@ -113,7 +114,7 @@ public class DefaultAuthService implements AuthService {
     public AuthTokenResponse signIn(SignInRequest request) {
         String userEmail = request.getEmail();
         User user = userRepo.findByEmail(userEmail)
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("user not found"));
 
         user.checkIfUserEnabled();
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userEmail, request.getPassword()));
@@ -123,12 +124,12 @@ public class DefaultAuthService implements AuthService {
 
     public String completeSignUp(String token) {
         ConfirmationToken confirmationToken = confirmationTokenRepo.findById(token)
-                .orElseThrow(() -> new TokenNotFoundException("Confirmation token not found"));
+                .orElseThrow(() -> new TokenNotFoundException("confirmation token not found"));
         if (confirmationToken.isExpired()) {
             throw new TokenExpirationException("confirmation token is expired");
         }
         User user = userRepo.findById(confirmationToken.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("user not found"));
         user.setEnabled(true);
         userRepo.save(user);
 
@@ -136,26 +137,26 @@ public class DefaultAuthService implements AuthService {
         return "User successfully activated";
     }
 
-    public void refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response) throws IOException {
+    public void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        final String refreshToken;
-        final String userEmail;
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return;
+            throw new TokenInvalidException("authorization header is missing or not valid");
         }
-        refreshToken = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(refreshToken);
-        if (userEmail != null) {
-            var user = this.userRepo.findByEmail(userEmail)
-                    .orElseThrow(() -> new UserNotFoundException("user not found"));
-            if (jwtService.isTokenValid(refreshToken, user)) {
-                var accessToken = jwtService.generateAccessToken(user);
-                var authResponse = new AuthTokenResponse(accessToken, refreshToken);
-                new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
-            }
+        final String refreshToken = authHeader.substring(7);
+        final String userEmail = jwtService.extractUsername(refreshToken);
+        if (userEmail == null) {
+            throw new TokenInvalidException("failed to extract user from token");
         }
+
+        var user = userRepo.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("user not found"));
+        if (!jwtService.isTokenValid(refreshToken, user)) {
+            throw new TokenInvalidException("refresh token is not valid");
+        }
+
+        var accessToken = jwtService.generateAccessToken(user);
+        var authResponse = new AuthTokenResponse(accessToken, refreshToken);
+        new ObjectMapper().writeValue(response.getOutputStream(), authResponse);
     }
 
     public String sendMessageForResetPassword(String email) throws MessagingException {

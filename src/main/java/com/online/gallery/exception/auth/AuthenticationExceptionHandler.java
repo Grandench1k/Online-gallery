@@ -28,6 +28,12 @@ public class AuthenticationExceptionHandler {
         return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler({TokenExpirationException.class,
+            TokenInvalidException.class})
+    public ResponseEntity<ExceptionResponse> handleBadRequestExceptions(RuntimeException e) {
+        return buildResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(TokenDuplicationException.class)
     public ResponseEntity<ExceptionResponse> handleConflictExceptions(RuntimeException e) {
         return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
