@@ -1,6 +1,6 @@
 package com.online.gallery.security.configuration;
 
-import com.online.gallery.repository.user.UserRepository;
+import com.online.gallery.repository.user.UserRepo;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,15 +14,16 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class ApplicationConfiguration {
-    private final UserRepository userRepository;
+    private final UserRepo userRepo;
 
-    public ApplicationConfiguration(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public ApplicationConfiguration(UserRepo userRepo) {
+        this.userRepo = userRepo;
     }
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return email -> userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("user not found."));
+        return email -> userRepo.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
     }
 
     @Bean
@@ -34,7 +35,8 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration)
+            throws Exception {
         return configuration.getAuthenticationManager();
     }
 

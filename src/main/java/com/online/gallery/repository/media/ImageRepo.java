@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ImageRepository extends MongoRepository<Image, String> {
+public interface ImageRepo extends MongoRepository<Image, String> {
     Optional<Image> findByNameAndUserId(String imageName, String userId);
 
     List<Image> findAllByUserId(String userId);

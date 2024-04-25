@@ -7,7 +7,7 @@ import com.online.gallery.exception.user.PasswordsMatchException;
 import com.online.gallery.exception.user.UserNotFoundException;
 import com.online.gallery.exception.user.WrongPasswordException;
 import com.online.gallery.model.user.User;
-import com.online.gallery.repository.user.UserRepository;
+import com.online.gallery.repository.user.UserRepo;
 import com.online.gallery.storage.s3.service.S3service;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,15 +29,15 @@ import java.util.Set;
 @Service
 public class DefaultUserService implements UserService {
     private final S3service s3service;
-    private final UserRepository userRepository;
+    private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
 
-    public DefaultUserService(S3service s3service, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DefaultUserService(S3service s3service, UserRepo userRepo, PasswordEncoder passwordEncoder) {
         this.s3service = s3service;
-        this.userRepository = userRepository;
+        this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -48,7 +48,7 @@ public class DefaultUserService implements UserService {
     public String getUserId(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
         String userId = user.getId();
-        if (!userRepository.existsById(userId)) {
+        if (!userRepo.existsById(userId)) {
             throw new UserNotFoundException("user not found");
         }
         user.checkIfUserEnabled();
@@ -57,7 +57,7 @@ public class DefaultUserService implements UserService {
 
     public User getUser(Authentication authentication) {
         User user = (User) authentication.getPrincipal();
-        return userRepository.findById(user.getId())
+        return userRepo.findById(user.getId())
                 .orElseThrow(() -> new UserNotFoundException("user not found"));
     }
 
@@ -94,7 +94,7 @@ public class DefaultUserService implements UserService {
                 generateLinkWithUserIdForS3ProfileImages(user.getId()) + nameOfNewFile,
                 profileImageFile.getBytes());
         user.setProfileImageName(id);
-        userRepository.save(user);
+        userRepo.save(user);
         return "profile image saved";
     }
 
@@ -112,7 +112,7 @@ public class DefaultUserService implements UserService {
                 generateLinkWithUserIdForS3ProfileImages(userId) + id,
                 profileImageFile.getBytes());
         user.setProfileImageName(id);
-        userRepository.save(user);
+        userRepo.save(user);
         return "profile image updated";
     }
 
@@ -125,7 +125,7 @@ public class DefaultUserService implements UserService {
             throw new PasswordsMatchException("both passwords match");
         }
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        userRepo.save(user);
         return "password updated";
     }
 }

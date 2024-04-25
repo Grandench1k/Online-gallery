@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface ConfirmationTokenRepository extends MongoRepository<ConfirmationToken, String> {
+public interface ConfirmationTokenRepo extends MongoRepository<ConfirmationToken, String> {
     Optional<ConfirmationToken> findByUserId(String userId);
 }

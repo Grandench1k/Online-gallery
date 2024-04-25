@@ -5,7 +5,7 @@ import com.online.gallery.exception.file.InvalidFilenameException;
 import com.online.gallery.exception.media.image.ImageDuplicationException;
 import com.online.gallery.exception.media.image.ImageNotFoundException;
 import com.online.gallery.model.media.Image;
-import com.online.gallery.repository.media.ImageRepository;
+import com.online.gallery.repository.media.ImageRepo;
 import com.online.gallery.storage.s3.service.S3service;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,14 +25,14 @@ import java.util.Set;
 @Transactional
 @Service
 public class DefaultImageService implements ImageService {
-    private final ImageRepository imageRepository;
+    private final ImageRepo imageRepo;
     private final S3service s3service;
 
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
 
-    public DefaultImageService(ImageRepository imageRepository, S3service s3service) {
-        this.imageRepository = imageRepository;
+    public DefaultImageService(ImageRepo imageRepo, S3service s3service) {
+        this.imageRepo = imageRepo;
         this.s3service = s3service;
     }
 
@@ -42,7 +42,7 @@ public class DefaultImageService implements ImageService {
 
     @Cacheable(cacheNames = "imageCache", key = "'list-' + #userId")
     public List<Image> findAllImages(String userId) {
-        List<Image> allImages = imageRepository.findAllByUserId(userId);
+        List<Image> allImages = imageRepo.findAllByUserId(userId);
         if (allImages.isEmpty()) {
             throw new ImageNotFoundException("no images found for user: " + userId);
         }
@@ -50,7 +50,7 @@ public class DefaultImageService implements ImageService {
     }
 
     public byte[] findImageById(String imageId, String userId) {
-        Image image = imageRepository.findByIdAndUserId(imageId, userId)
+        Image image = imageRepo.findByIdAndUserId(imageId, userId)
                 .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
         return s3service.getObject(bucketName, generateLinkWithUserIdForS3Images(userId) + image.getFilePath());
     }
@@ -71,7 +71,7 @@ public class DefaultImageService implements ImageService {
 
     @CachePut(cacheNames = "imageCache", key = "'list-' + #userId")
     public Image saveImage(MultipartFile imageFile, Image image, String userId) throws IOException {
-        imageRepository.findByNameAndUserId(image.getName(), userId).ifPresent(s -> {
+        imageRepo.findByNameAndUserId(image.getName(), userId).ifPresent(s -> {
             throw new ImageDuplicationException("image with this name is already defined for user " + userId);
         });
         String originalFilename = imageFile.getOriginalFilename();
@@ -85,27 +85,27 @@ public class DefaultImageService implements ImageService {
         image.setFilePath(nameOfNewFile);
         image.setId(id);
         image.setUserId(userId);
-        return imageRepository.save(image);
+        return imageRepo.save(image);
     }
 
     @CachePut(cacheNames = "imageCache", key = "'image-' + #imageId")
     public Image updateImageById(String imageId, Image newImage, String userId) {
-        Image imageToUpdate = imageRepository.findByIdAndUserId(imageId, userId)
+        Image imageToUpdate = imageRepo.findByIdAndUserId(imageId, userId)
                 .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
         String imageName = newImage.getName();
-        if (imageRepository.findByNameAndUserId(imageName, userId).isPresent()) {
+        if (imageRepo.findByNameAndUserId(imageName, userId).isPresent()) {
             throw new ImageDuplicationException("image with this name is already defined");
         }
         imageToUpdate.setName(imageName);
-        return imageRepository.save(imageToUpdate);
+        return imageRepo.save(imageToUpdate);
     }
 
     @CacheEvict(cacheNames = "imageCache", allEntries = true)
     public Image deleteImageById(String imageId, String userId) {
-        Image imageToDelete = imageRepository.findByIdAndUserId(imageId, userId)
+        Image imageToDelete = imageRepo.findByIdAndUserId(imageId, userId)
                 .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
         s3service.deleteObject(bucketName, "images/" + imageToDelete.getFilePath());
-        imageRepository.delete(imageToDelete);
+        imageRepo.delete(imageToDelete);
         return imageToDelete;
     }
 }

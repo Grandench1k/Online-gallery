@@ -16,9 +16,9 @@ import com.online.gallery.model.auth.ConfirmationToken;
 import com.online.gallery.model.auth.PasswordResetToken;
 import com.online.gallery.model.user.Role;
 import com.online.gallery.model.user.User;
-import com.online.gallery.repository.auth.ConfirmationTokenRepository;
-import com.online.gallery.repository.auth.PasswordResetTokenRepository;
-import com.online.gallery.repository.user.UserRepository;
+import com.online.gallery.repository.auth.ConfirmationTokenRepo;
+import com.online.gallery.repository.auth.PasswordResetTokenRepo;
+import com.online.gallery.repository.user.UserRepo;
 import com.online.gallery.security.service.JwtService;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,30 +38,30 @@ import java.util.Optional;
 @Transactional
 @Service
 public class DefaultAuthService implements AuthService {
-    private final UserRepository userRepository;
+    private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final DefaultMailSender mailSender;
     private final AuthenticationManager authenticationManager;
-    private final ConfirmationTokenRepository confirmationTokenRepository;
-    private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final ConfirmationTokenRepo confirmationTokenRepo;
+    private final PasswordResetTokenRepo passwordResetTokenRepo;
     private final String urlForEmailMessageGeneration = "http://localhost:8080";
-    private String endpointForCompleteSignUp = "/api/v1/auth/verify/";
+    private final String endpointForCompleteSignUp = "/api/v1/auth/verify/";
 
-    public DefaultAuthService(UserRepository userRepository,
+    public DefaultAuthService(UserRepo userRepo,
                               PasswordEncoder passwordEncoder,
                               JwtService jwtService,
                               DefaultMailSender mailSender,
                               AuthenticationManager authenticationManager,
-                              ConfirmationTokenRepository confirmationTokenRepository,
-                              PasswordResetTokenRepository passwordResetTokenRepository) {
-        this.userRepository = userRepository;
+                              ConfirmationTokenRepo confirmationTokenRepo,
+                              PasswordResetTokenRepo passwordResetTokenRepo) {
+        this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.mailSender = mailSender;
         this.authenticationManager = authenticationManager;
-        this.confirmationTokenRepository = confirmationTokenRepository;
-        this.passwordResetTokenRepository = passwordResetTokenRepository;
+        this.confirmationTokenRepo = confirmationTokenRepo;
+        this.passwordResetTokenRepo = passwordResetTokenRepo;
     }
 
     private AuthTokenResponse buildAuthResponse(User user) {
@@ -72,19 +72,19 @@ public class DefaultAuthService implements AuthService {
 
     public AuthTokenResponse processSignUp(SignUpRequest request) throws MessagingException {
         String userEmail = request.getEmail();
-        userRepository.findByEmail(userEmail).ifPresent(user -> {
+        userRepo.findByEmail(userEmail).ifPresent(user -> {
             if (user.isEnabled()) {
                 throw new UserDuplicationException("user with this email already exist");
             } else {
-                confirmationTokenRepository.findByUserId(user.getId())
+                confirmationTokenRepo.findByUserId(user.getId())
                         .ifPresent(token -> {
                             if (!token.isExpired()) {
                                 throw new TokenDuplicationException(
                                         "confirmation token has already been sent," +
                                                 " please check your email");
                             } else {
-                                confirmationTokenRepository.delete(token);
-                                userRepository.delete(user);
+                                confirmationTokenRepo.delete(token);
+                                userRepo.delete(user);
                             }
                         });
             }
@@ -96,11 +96,11 @@ public class DefaultAuthService implements AuthService {
                 .email(request.getEmail())
                 .role(Role.USER)
                 .build();
-        userRepository.save(user);
+        userRepo.save(user);
 
         String token = new ObjectId().toString();
 
-        confirmationTokenRepository.save(new ConfirmationToken(token, user.getId()));
+        confirmationTokenRepo.save(new ConfirmationToken(token, user.getId()));
 
         mailSender.sendConfirmationEmail(EmailMessageBuilder.BuildConfirmationEmail(
                         userEmail,
@@ -112,8 +112,8 @@ public class DefaultAuthService implements AuthService {
 
     public AuthTokenResponse signIn(SignInRequest request) {
         String userEmail = request.getEmail();
-        User user = userRepository.findByEmail(userEmail)
-                .orElseThrow(() -> new UserNotFoundException("User not found."));
+        User user = userRepo.findByEmail(userEmail)
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         user.checkIfUserEnabled();
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(userEmail, request.getPassword()));
@@ -122,18 +122,18 @@ public class DefaultAuthService implements AuthService {
     }
 
     public String completeSignUp(String token) {
-        ConfirmationToken confirmationToken = confirmationTokenRepository.findById(token)
-                .orElseThrow(() -> new TokenNotFoundException("Confirmation token not found."));
+        ConfirmationToken confirmationToken = confirmationTokenRepo.findById(token)
+                .orElseThrow(() -> new TokenNotFoundException("Confirmation token not found"));
         if (confirmationToken.isExpired()) {
             throw new TokenExpirationException("confirmation token is expired");
         }
-        User user = userRepository.findById(confirmationToken.getUserId())
-                .orElseThrow(() -> new UserNotFoundException("User not found."));
+        User user = userRepo.findById(confirmationToken.getUserId())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         user.setEnabled(true);
-        userRepository.save(user);
+        userRepo.save(user);
 
-        confirmationTokenRepository.deleteById(confirmationToken.getId());
-        return "User successfully activated.";
+        confirmationTokenRepo.deleteById(confirmationToken.getId());
+        return "User successfully activated";
     }
 
     public void refreshToken(
@@ -148,7 +148,7 @@ public class DefaultAuthService implements AuthService {
         refreshToken = authHeader.substring(7);
         userEmail = jwtService.extractUsername(refreshToken);
         if (userEmail != null) {
-            var user = this.userRepository.findByEmail(userEmail)
+            var user = this.userRepo.findByEmail(userEmail)
                     .orElseThrow(() -> new UserNotFoundException("user not found"));
             if (jwtService.isTokenValid(refreshToken, user)) {
                 var accessToken = jwtService.generateAccessToken(user);
@@ -159,22 +159,22 @@ public class DefaultAuthService implements AuthService {
     }
 
     public String sendMessageForResetPassword(String email) throws MessagingException {
-        User user = userRepository.findByEmail(email)
+        User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException("user not found"));
         user.checkIfUserEnabled();
         Optional<PasswordResetToken> optionalPasswordResetToken =
-                passwordResetTokenRepository.findByEmail(email);
+                passwordResetTokenRepo.findByEmail(email);
         if (optionalPasswordResetToken.isPresent()) {
             PasswordResetToken passwordResetToken = optionalPasswordResetToken.get();
             if (passwordResetToken.getExpiredAt().isAfter(LocalDateTime.now())) {
                 throw new TokenDuplicationException(
                         "password recovery link was already sent. Try again in 15 minutes");
             }
-            passwordResetTokenRepository.deleteById(passwordResetToken.getId());
+            passwordResetTokenRepo.deleteById(passwordResetToken.getId());
             sendMessageForResetPassword(email);
         }
         String token = new ObjectId().toString();
-        passwordResetTokenRepository.save(new PasswordResetToken(token,
+        passwordResetTokenRepo.save(new PasswordResetToken(token,
                 user.getEmail()));
         mailSender.sendConfirmationEmail(
                 EmailMessageBuilder.BuildResetEmail(
@@ -184,9 +184,9 @@ public class DefaultAuthService implements AuthService {
     }
 
     public String processPasswordReset(String token) {
-        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findById(token)
+        PasswordResetToken passwordResetToken = passwordResetTokenRepo.findById(token)
                 .orElseThrow(() -> new TokenNotFoundException("not found password reset token"));
-        if (!userRepository.existsByEmail(passwordResetToken.getEmail())) {
+        if (!userRepo.existsByEmail(passwordResetToken.getEmail())) {
             throw new UserNotFoundException("user not found");
         }
         if (passwordResetToken.getExpiredAt().isBefore(LocalDateTime.now())) {
@@ -196,9 +196,9 @@ public class DefaultAuthService implements AuthService {
     }
 
     public String completePasswordReset(String token, String newPassword) {
-        PasswordResetToken passwordResetToken = passwordResetTokenRepository.findById(token)
+        PasswordResetToken passwordResetToken = passwordResetTokenRepo.findById(token)
                 .orElseThrow(() -> new TokenNotFoundException("not found password reset token"));
-        User user = userRepository.findByEmail(passwordResetToken.getEmail())
+        User user = userRepo.findByEmail(passwordResetToken.getEmail())
                 .orElseThrow(() -> new UserNotFoundException("user not found"));
         if (passwordResetToken.getExpiredAt().isBefore(LocalDateTime.now())) {
             throw new TokenExpirationException("password reset token is expired");
@@ -206,9 +206,9 @@ public class DefaultAuthService implements AuthService {
         if (passwordEncoder.matches(newPassword, user.getPassword())) {
             throw new PasswordsMatchException("passwords match");
         }
-        passwordResetTokenRepository.deleteById(token);
+        passwordResetTokenRepo.deleteById(token);
         user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        userRepo.save(user);
         return "password successfully changed";
     }
 }

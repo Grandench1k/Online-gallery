@@ -5,7 +5,7 @@ import com.online.gallery.exception.file.InvalidFilenameException;
 import com.online.gallery.exception.media.video.VideoDuplicationException;
 import com.online.gallery.exception.media.video.VideoNotFoundException;
 import com.online.gallery.model.media.Video;
-import com.online.gallery.repository.media.VideoRepository;
+import com.online.gallery.repository.media.VideoRepo;
 import com.online.gallery.storage.s3.service.S3service;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,13 +25,13 @@ import java.util.Set;
 @Transactional
 @Service
 public class DefaultVideoService implements VideoService {
-    private final VideoRepository videoRepository;
+    private final VideoRepo videoRepo;
     private final S3service s3service;
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
 
-    public DefaultVideoService(VideoRepository videoRepository, S3service s3service) {
-        this.videoRepository = videoRepository;
+    public DefaultVideoService(VideoRepo videoRepo, S3service s3service) {
+        this.videoRepo = videoRepo;
         this.s3service = s3service;
     }
 
@@ -41,7 +41,7 @@ public class DefaultVideoService implements VideoService {
 
     @Cacheable(cacheNames = "videoCache", key = "'list-' + #userId")
     public List<Video> findAllVideos(String userId) {
-        List<Video> allVideos = videoRepository.findAllByUserId(userId);
+        List<Video> allVideos = videoRepo.findAllByUserId(userId);
         if (allVideos.isEmpty()) {
             throw new VideoNotFoundException("videos not found for user " + userId);
         }
@@ -49,7 +49,7 @@ public class DefaultVideoService implements VideoService {
     }
 
     public byte[] findVideoById(String videoId, String userId) {
-        Video video = videoRepository.findByIdAndUserId(videoId, userId)
+        Video video = videoRepo.findByIdAndUserId(videoId, userId)
                 .orElseThrow(() -> new VideoNotFoundException("video with ID " + videoId + " not found"));
         return s3service.getObject(bucketName,
                 generateLinkWithUserIdForS3Videos(userId) + video.getFilePath());
@@ -71,7 +71,7 @@ public class DefaultVideoService implements VideoService {
 
     @CachePut(cacheNames = "videoCache", key = "'list-' + #userId")
     public Video saveVideo(Video videoToSave, MultipartFile videoFile, String userId) throws IOException {
-        videoRepository.findByNameAndUserId(videoToSave.getName(), userId)
+        videoRepo.findByNameAndUserId(videoToSave.getName(), userId)
                 .ifPresent(s -> {
                     throw new VideoDuplicationException(
                             "video with this name is already defined for user " + userId);
@@ -86,32 +86,32 @@ public class DefaultVideoService implements VideoService {
         videoToSave.setFilePath(nameOfNewFile);
         videoToSave.setId(id);
         videoToSave.setUserId(userId);
-        return videoRepository.save(videoToSave);
+        return videoRepo.save(videoToSave);
     }
 
     @CachePut(cacheNames = "videoCache", key = "'video-' + #videoId")
     public Video updateVideoById(String videoId, Video video, String userId) {
-        Video videoToUpdate = videoRepository.findByIdAndUserId(videoId, userId)
+        Video videoToUpdate = videoRepo.findByIdAndUserId(videoId, userId)
                 .orElseThrow(() -> new VideoNotFoundException("video with ID " + videoId + " not found"));
 
-        videoRepository.findByNameAndUserId(video.getName(), userId)
+        videoRepo.findByNameAndUserId(video.getName(), userId)
                 .ifPresent(s -> {
                     throw new VideoDuplicationException(
                             "video with this name is already defined for user " + userId);
                 });
 
         videoToUpdate.setName(video.getName());
-        return videoRepository.save(videoToUpdate);
+        return videoRepo.save(videoToUpdate);
     }
 
     @CacheEvict(cacheNames = "videoCache", allEntries = true)
     public Video deleteVideoById(String videoId, String userId) {
-        Video videoToDelete = videoRepository.findByIdAndUserId(videoId, userId)
+        Video videoToDelete = videoRepo.findByIdAndUserId(videoId, userId)
                 .orElseThrow(() -> new VideoNotFoundException("video with ID " + videoId + " not found"));
         s3service.deleteObject(
                 bucketName,
                 generateLinkWithUserIdForS3Videos(userId) + videoToDelete.getFilePath());
-        videoRepository.delete(videoToDelete);
+        videoRepo.delete(videoToDelete);
         return videoToDelete;
     }
 }

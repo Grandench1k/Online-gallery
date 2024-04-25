@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface PasswordResetTokenRepository extends MongoRepository<PasswordResetToken, String> {
+public interface PasswordResetTokenRepo extends MongoRepository<PasswordResetToken, String> {
     Optional<PasswordResetToken> findByEmail(String email);
 }
