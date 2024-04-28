@@ -1,7 +1,7 @@
 package com.online.gallery.repository.media;
 
 
-import com.online.gallery.model.media.Video;
+import com.online.gallery.entity.media.Video;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +15,6 @@ public interface VideoRepo extends MongoRepository<Video, String> {
     Optional<Video> findByNameAndUserId(String name, String userId);
 
     Optional<Video> findByIdAndUserId(String id, String userId);
+
+    boolean existsByIdAndUserId(String id, String userId);
 }

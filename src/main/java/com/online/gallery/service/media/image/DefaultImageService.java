@@ -1,110 +1,133 @@
 package com.online.gallery.service.media.image;
 
-import com.online.gallery.exception.file.InvalidFileFormatException;
-import com.online.gallery.exception.file.InvalidFilenameException;
+import com.online.gallery.dto.request.ImageDetailsRequest;
+import com.online.gallery.dto.request.ImageFileUploadRequest;
+import com.online.gallery.dto.response.PresignedLinkResponse;
+import com.online.gallery.entity.media.Image;
 import com.online.gallery.exception.media.image.ImageDuplicationException;
 import com.online.gallery.exception.media.image.ImageNotFoundException;
-import com.online.gallery.model.media.Image;
+import com.online.gallery.exception.media.video.VideoNotFoundException;
+import com.online.gallery.exception.user.UserAccessDeniedException;
 import com.online.gallery.repository.media.ImageRepo;
 import com.online.gallery.storage.s3.service.S3service;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Transactional
 @Service
 public class DefaultImageService implements ImageService {
     private final ImageRepo imageRepo;
     private final S3service s3service;
+    private final String notFoundMessage = "image with this ID not found";
+    private final String duplicationMessage = "image with this name is already defined";
 
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
+
+    @Value("${aws.s3.image.get.expiration.s}")
+    private long imageGetExpiration;
+    @Value("${aws.s3.image.put.expiration.s}")
+    private long imagePutExpiration;
 
     public DefaultImageService(ImageRepo imageRepo, S3service s3service) {
         this.imageRepo = imageRepo;
         this.s3service = s3service;
     }
 
-    private String generateLinkWithUserIdForS3Images(String userId) {
-        return "images/" + userId + "/";
+    private String generateLinkWithUserIdForS3Images(String imageId, String userId) {
+        return "images/" + userId + "/" + imageId + "/";
     }
 
-    @Cacheable(cacheNames = "imageCache", key = "'list-' + #userId")
+    @Cacheable(cacheNames = "imagesCache", key = "'imageList-' + #userId")
     public List<Image> findAllImages(String userId) {
         List<Image> allImages = imageRepo.findAllByUserId(userId);
         if (allImages.isEmpty()) {
-            throw new ImageNotFoundException("no images found for user: " + userId);
+            throw new ImageNotFoundException("images not found");
         }
         return allImages;
     }
 
-    public byte[] findImageById(String imageId, String userId) {
+    @Cacheable(cacheNames = "imagesCache", key = "'image-' + #imageId")
+    public Image findImageById(String imageId, String userId) {
+        return imageRepo.findByIdAndUserId(imageId, userId)
+                .orElseThrow(() -> new ImageNotFoundException(notFoundMessage));
+    }
+
+    public PresignedLinkResponse generatePresignedGetImageUrl(String imageId, String userId) {
         Image image = imageRepo.findByIdAndUserId(imageId, userId)
-                .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
-        return s3service.getObject(bucketName, generateLinkWithUserIdForS3Images(userId) + image.getFilePath());
+                .orElseThrow(() -> new ImageNotFoundException(notFoundMessage));
+        return new PresignedLinkResponse(
+                imageGetExpiration,
+                s3service.generatePresignedGetObjectUrl(
+                        bucketName, image.getFilePath(), imageGetExpiration));
     }
 
-    private void checkFileFormat(String originalFilename) {
-        if (originalFilename == null || originalFilename.trim().isEmpty()) {
-            throw new InvalidFilenameException("invalid filename");
+    public PresignedLinkResponse generatePresignedPutUrl(
+            ImageFileUploadRequest imageFileUploadRequest, String userId) {
+        String imageName = imageFileUploadRequest.getName();
+        String imageId = imageFileUploadRequest.getId();
+        if (imageRepo.existsByIdAndUserId(imageId, userId)) {
+            throw new ImageDuplicationException(duplicationMessage);
         }
-        String fileFormat = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
-        Set<String> allowedFormats = new HashSet<>(
-                Arrays.asList(".jpg", ".png", ".webp", ".bmp", ".jpeg", ".gif", ".tiff"));
-        if (!allowedFormats.contains(fileFormat)) {
-            throw new InvalidFileFormatException(
-                    "incorrect image format. Please send an image with one" +
-                            " of the following formats: .jpg, .png, .webp, .bmp, .jpeg, .gif, .tiff");
-        }
+        String filePath = generateLinkWithUserIdForS3Images(userId, imageId) + imageName;
+        return new PresignedLinkResponse(imagePutExpiration,
+                s3service.generatePresignedPutObjectUrl(
+                        bucketName, filePath, imagePutExpiration));
     }
 
-    @CachePut(cacheNames = "imageCache", key = "'list-' + #userId")
-    public Image saveImage(MultipartFile imageFile, Image image, String userId) throws IOException {
-        imageRepo.findByNameAndUserId(image.getName(), userId).ifPresent(s -> {
-            throw new ImageDuplicationException("image with this name is already defined for user " + userId);
-        });
-        String originalFilename = imageFile.getOriginalFilename();
-        checkFileFormat(originalFilename);
-        String id = new ObjectId().toString();
-        String nameOfNewFile = id + "_" + originalFilename;
-        s3service.putObject(
-                bucketName,
-                generateLinkWithUserIdForS3Images(userId) + nameOfNewFile,
-                imageFile.getBytes());
-        image.setFilePath(nameOfNewFile);
-        image.setId(id);
-        image.setUserId(userId);
+    @CacheEvict(cacheNames = "imagesCache", key = "'imageList-' + #userId")
+    public Image saveImage(Image imageToSave, String userId) {
+        String imageName = imageToSave.getName();
+        String imageId = imageToSave.getId();
+        if (imageRepo.existsByIdAndUserId(imageId, userId)) {
+            throw new ImageDuplicationException(duplicationMessage);
+        }
+        String filePath = generateLinkWithUserIdForS3Images(userId, imageId) + imageName;
+        Image image = new Image(imageId, imageName, filePath, userId);
         return imageRepo.save(image);
     }
 
-    @CachePut(cacheNames = "imageCache", key = "'image-' + #imageId")
-    public Image updateImageById(String imageId, Image newImage, String userId) {
-        Image imageToUpdate = imageRepo.findByIdAndUserId(imageId, userId)
-                .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
-        String imageName = newImage.getName();
-        if (imageRepo.findByNameAndUserId(imageName, userId).isPresent()) {
-            throw new ImageDuplicationException("image with this name is already defined");
+    @CacheEvict(cacheNames = "imagesCache", allEntries = true)
+    public Image updateImageById(Image newImage, String imageId, String userId) {
+        if (newImage.getUserId() != null && !newImage.getUserId().equals(userId)) {
+            throw new UserAccessDeniedException("you don't have access to another user");
         }
-        imageToUpdate.setName(imageName);
-        return imageRepo.save(imageToUpdate);
+        Image imageToUpdate = imageRepo.findByIdAndUserId(imageId, userId)
+                .orElseThrow(() -> new ImageNotFoundException(notFoundMessage));
+        if (!imageId.equals(newImage.getId())) {
+            throw new VideoNotFoundException("image with this ID in request body not found");
+        }
+        if (imageRepo.findByNameAndUserId(newImage.getName(), userId).isPresent()) {
+            throw new ImageDuplicationException(duplicationMessage);
+        }
+        imageRepo.delete(imageToUpdate);
+        return imageRepo.save(
+                newImage);
     }
 
-    @CacheEvict(cacheNames = "imageCache", allEntries = true)
+    @CacheEvict(cacheNames = "imagesCache", allEntries = true)
+    public Image updateImageDetailsById(ImageDetailsRequest newImageDetails, String imageId, String userId) {
+        Image imageToUpdate = imageRepo.findByIdAndUserId(imageId, userId)
+                .orElseThrow(() -> new ImageNotFoundException(notFoundMessage));
+        String imageName = newImageDetails.getName();
+        if (imageRepo.findByNameAndUserId(imageName, userId).isPresent()) {
+            throw new ImageDuplicationException(duplicationMessage);
+        }
+        imageToUpdate.setName(imageName);
+        return imageRepo.save(
+                imageToUpdate);
+    }
+
+    @CacheEvict(cacheNames = "imagesCache", allEntries = true)
     public Image deleteImageById(String imageId, String userId) {
         Image imageToDelete = imageRepo.findByIdAndUserId(imageId, userId)
-                .orElseThrow(() -> new ImageNotFoundException("image with ID " + imageId + " not found"));
-        s3service.deleteObject(bucketName, "images/" + imageToDelete.getFilePath());
+                .orElseThrow(() -> new ImageNotFoundException(notFoundMessage));
+        s3service.deleteObject(bucketName, imageToDelete.getFilePath());
         imageRepo.delete(imageToDelete);
         return imageToDelete;
     }

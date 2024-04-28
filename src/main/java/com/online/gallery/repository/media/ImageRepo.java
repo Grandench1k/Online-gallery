@@ -1,7 +1,7 @@
 package com.online.gallery.repository.media;
 
 
-import com.online.gallery.model.media.Image;
+import com.online.gallery.entity.media.Image;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
@@ -15,4 +15,6 @@ public interface ImageRepo extends MongoRepository<Image, String> {
     List<Image> findAllByUserId(String userId);
 
     Optional<Image> findByIdAndUserId(String id, String userId);
+
+    boolean existsByIdAndUserId(String id, String userId);
 }

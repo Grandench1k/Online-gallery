@@ -16,7 +16,7 @@ public class DataResponse<T> {
     private final int status;
 
     @Schema(
-            description = "timestamp of when the response was generated",
+            description = "timestamp ofwhen the response was generated",
             example = "2021-04-12T10:15:30+00:00"
     )
     private final ZonedDateTime timestamp;

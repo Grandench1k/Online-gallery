@@ -1,17 +1,18 @@
 package com.online.gallery.controller.media.image;
 
+import com.online.gallery.dto.request.ImageDetailsRequest;
+import com.online.gallery.dto.request.ImageFileUploadRequest;
 import com.online.gallery.dto.response.DataResponse;
-import com.online.gallery.model.media.Image;
+import com.online.gallery.dto.response.PresignedLinkResponse;
+import com.online.gallery.entity.media.Image;
+import com.online.gallery.entity.user.User;
 import com.online.gallery.service.media.image.ImageService;
 import com.online.gallery.service.user.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,50 +27,74 @@ public class DefaultImageController implements ImageController {
     }
 
     @GetMapping
-    public ResponseEntity<DataResponse<List<Image>>> listAllImages(Authentication authentication) {
-        return ResponseEntity
-                .ok(new DataResponse<>(imageService.findAllImages(userService.getUserId(authentication))));
+    public ResponseEntity<DataResponse<List<Image>>> listAllImages(
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                imageService.findAllImages(userService.getUserId(user))));
     }
 
-    @GetMapping(value = "/{imageId}",
-            produces = {
-                    MediaType.IMAGE_JPEG_VALUE,
-                    MediaType.IMAGE_GIF_VALUE,
-                    MediaType.IMAGE_PNG_VALUE,
-                    "image/tiff",
-                    "image/bmp",
-                    "image/jpg",
-                    "image/webp"})
-    public ResponseEntity<DataResponse<byte[]>> getImageById(
+    @GetMapping("/{imageId}")
+    public ResponseEntity<DataResponse<Image>> getImageById(
             @PathVariable String imageId,
-            Authentication authentication) {
-        return ResponseEntity
-                .ok(new DataResponse<>(imageService.findImageById(imageId, userService.getUserId(authentication))));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                imageService.findImageById(imageId, userService.getUserId(user))));
     }
 
-    @PostMapping(consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @GetMapping("/generate-get-url/{imageId}")
+    public ResponseEntity<PresignedLinkResponse> generatePresignedGetImageUrl(
+            @PathVariable String imageId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(imageService.generatePresignedGetImageUrl(
+                imageId, userService.getUserId(user)));
+    }
+
+    @PostMapping("/generate-upload-url")
+    public ResponseEntity<PresignedLinkResponse> prepareImageUpload(
+            @RequestBody @Valid ImageFileUploadRequest imageFileUploadRequest,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(imageService.generatePresignedPutUrl(
+                imageFileUploadRequest, userService.getUserId(user)));
+    }
+
+    @PostMapping()
     public ResponseEntity<DataResponse<Image>> saveImage(
-            @RequestPart @Valid Image image,
-            @RequestPart MultipartFile imageFile,
-            Authentication authentication) throws IOException {
-        return ResponseEntity
-                .ok(new DataResponse<>(imageService.saveImage(imageFile, image, userService.getUserId(authentication))));
+            @RequestBody @Valid Image image,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                imageService.saveImage(image, userService.getUserId(user))));
+    }
+
+    @PutMapping("/{imageId}")
+    public ResponseEntity<DataResponse<Image>> updateImageById(
+            @RequestBody @Valid Image image,
+            @PathVariable String imageId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                imageService.updateImageById(image,
+                        imageId,
+                        userService.getUserId(user))));
     }
 
     @PatchMapping("/{imageId}")
-    public ResponseEntity<DataResponse<Image>> updateImageById(
+    public ResponseEntity<DataResponse<Image>> updateImageDetailsById(
+            @RequestBody @Valid ImageDetailsRequest imageDetailsRequest,
             @PathVariable String imageId,
-            @RequestBody @Valid Image image,
-            Authentication authentication) {
-        return ResponseEntity
-                .ok(new DataResponse<>(imageService.updateImageById(imageId, image, userService.getUserId(authentication))));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                imageService.updateImageDetailsById(
+                        imageDetailsRequest,
+                        imageId,
+                        userService.getUserId(user))));
     }
 
     @DeleteMapping("/{imageId}")
     public ResponseEntity<DataResponse<Image>> deleteImageById(
             @PathVariable String imageId,
-            Authentication authentication) {
-        return ResponseEntity
-                .ok(new DataResponse<>(imageService.deleteImageById(imageId, userService.getUserId(authentication))));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                imageService.deleteImageById(imageId,
+                        userService.getUserId(user))));
     }
 }
+

@@ -21,7 +21,8 @@ public class DefaultMailSender implements MailSender {
     }
 
     @Async
-    public void sendConfirmationEmail(String text, String toAddress, String subject) throws MessagingException {
+    public void sendConfirmationEmail(String text, String toAddress, String subject)
+            throws MessagingException {
         try {
             MimeMessage mimeMessage = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, "UTF-8");
@@ -31,7 +32,7 @@ public class DefaultMailSender implements MailSender {
             helper.setFrom(mail);
             mailSender.send(mimeMessage);
         } catch (MessagingException | MailException e) {
-            throw new MessagingException("Failed when trying to send the confirmation email.");
+            throw new MessagingException("Failedwhen trying to send the confirmation email.");
         }
     }
 }

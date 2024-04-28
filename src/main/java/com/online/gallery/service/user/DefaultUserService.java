@@ -1,29 +1,22 @@
 package com.online.gallery.service.user;
 
-import com.online.gallery.exception.file.InvalidFileFormatException;
-import com.online.gallery.exception.file.InvalidFilenameException;
+import com.online.gallery.dto.request.ImageFileUploadRequest;
+import com.online.gallery.dto.response.PresignedLinkResponse;
+import com.online.gallery.entity.media.Image;
+import com.online.gallery.entity.user.User;
 import com.online.gallery.exception.media.image.ImageNotFoundException;
 import com.online.gallery.exception.user.PasswordsMatchException;
+import com.online.gallery.exception.user.UserNotEnabledException;
 import com.online.gallery.exception.user.UserNotFoundException;
 import com.online.gallery.exception.user.WrongPasswordException;
-import com.online.gallery.model.user.User;
 import com.online.gallery.repository.user.UserRepo;
 import com.online.gallery.storage.s3.service.S3service;
-import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Set;
 
 @Transactional
 @Service
@@ -35,88 +28,75 @@ public class DefaultUserService implements UserService {
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
 
-    public DefaultUserService(S3service s3service, UserRepo userRepo, PasswordEncoder passwordEncoder) {
+    @Value("${aws.s3.image.get.expiration.s}")
+    private long profileImageGetExpiration;
+
+    @Value("${aws.s3.image.put.expiration.s}")
+    private long profileImagePutExpiration;
+
+    public DefaultUserService(S3service s3service, UserRepo userRepo,
+                              PasswordEncoder passwordEncoder) {
         this.s3service = s3service;
         this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
     }
 
-    private String generateLinkWithUserIdForS3ProfileImages(String userId) {
+    public String generateLinkWithUserIdForS3ProfileImages(String userId) {
         return "profileImages/" + userId + "/";
     }
 
-    public String getUserId(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
-        String userId = user.getId();
-        if (!userRepo.existsById(userId)) {
-            throw new UserNotFoundException("user not found");
+    @Cacheable(cacheNames = "userProfileImageCache", key = "'userId-' + #authentication")
+    public String getUserId(User user) {
+        User userFromDb = userRepo.findById(user.getId())
+                .orElseThrow(() -> new UserNotFoundException("user not found"));
+        if (!userFromDb.isEnabled()) {
+            throw new UserNotEnabledException("please confirm sign up with email");
         }
-        user.checkIfUserEnabled();
-        return userId;
+        return userFromDb.getId();
     }
 
-    public User getUser(Authentication authentication) {
-        User user = (User) authentication.getPrincipal();
+    @Cacheable(cacheNames = "userProfileImageCache", key = "'user-' + #authentication")
+    public User getUser(User user) {
+        if (!user.isEnabled()) {
+            throw new UserNotEnabledException("please confirm sign up with email");
+        }
         return userRepo.findById(user.getId())
                 .orElseThrow(() -> new UserNotFoundException("user not found"));
     }
 
-    @Cacheable(cacheNames = "userProfileImageCache", key = "#user.id")
-    public byte[] getProfileImage(User user) {
-        String profileImageId = user.getProfileImageName();
-        if (profileImageId == null) {
+    public PresignedLinkResponse generatePresignedGetUrl(User user) {
+        String profileImageName = user.getProfileImageName();
+        if (profileImageName == null) {
             throw new ImageNotFoundException("profile image not found");
         }
-        return s3service.getObject(bucketName, generateLinkWithUserIdForS3ProfileImages(user.getId()) + profileImageId);
+        return new PresignedLinkResponse(profileImageGetExpiration,
+                s3service.generatePresignedGetObjectUrl(
+                        bucketName,
+                        generateLinkWithUserIdForS3ProfileImages(
+                                user.getId()) + profileImageName,
+                        profileImageGetExpiration));
     }
 
-    private String getFileFormat(MultipartFile imageFile) {
-        String originalFilename = imageFile.getOriginalFilename();
-        if (originalFilename == null || originalFilename.trim().isEmpty()) {
-            throw new InvalidFilenameException("invalid filename");
-        }
-        String fileFormat = originalFilename.substring(originalFilename.lastIndexOf("."));
-        Set<String> allowedFormats = new HashSet<>(Arrays.asList(
-                ".jpg", ".png", ".webp", ".jpeg"));
-        if (!allowedFormats.contains(fileFormat)) {
-            throw new InvalidFileFormatException("incorrect photo format, please send photo" +
-                    " with .jpg, .png, .webp or .jpeg formats");
-        }
-        return fileFormat;
-    }
-
-    @CachePut(cacheNames = "userProfileImageCache", key = "#user.id")
-    public String saveProfileImage(MultipartFile profileImageFile, User user) throws IOException {
-        String fileFormat = getFileFormat(profileImageFile);
-        String id = new ObjectId().toString();
-        String nameOfNewFile = id + "_" + fileFormat;
-        s3service.putObject(bucketName,
-                generateLinkWithUserIdForS3ProfileImages(user.getId()) + nameOfNewFile,
-                profileImageFile.getBytes());
-        user.setProfileImageName(id);
+    public PresignedLinkResponse generatePresignedPutUrl(
+            ImageFileUploadRequest imageFileUploadRequest, User user) {
+        user.setProfileImageName(imageFileUploadRequest.getName());
         userRepo.save(user);
-        return "profile image saved";
+        return new PresignedLinkResponse(profileImagePutExpiration,
+                s3service.generatePresignedPutObjectUrl(
+                        bucketName,
+                        generateLinkWithUserIdForS3ProfileImages(user.getId()) +
+                                imageFileUploadRequest.getName(),
+                        profileImagePutExpiration));
     }
 
-    @CacheEvict(cacheNames = "userProfileImageCache", key = "#user.id")
-    public String updateProfileImage(MultipartFile profileImageFile, User user) throws IOException {
-        String profileImageId = user.getProfileImageName();
-        if (profileImageId == null) {
-            throw new ImageNotFoundException("profile image with this ID not found");
-        }
-        String id = new ObjectId().toString();
-        String userId = user.getId();
-        s3service.deleteObject(bucketName,
-                generateLinkWithUserIdForS3ProfileImages(userId) + profileImageId);
-        s3service.putObject(bucketName,
-                generateLinkWithUserIdForS3ProfileImages(userId) + id,
-                profileImageFile.getBytes());
-        user.setProfileImageName(id);
-        userRepo.save(user);
-        return "profile image updated";
+    @CacheEvict(cacheNames = "userProfileImageCache", allEntries = true)
+    public User saveProfileImage(Image profileImageToSave, User user) {
+        user.setProfileImageName(profileImageToSave.getName());
+
+        return userRepo.save(user);
     }
 
-    @CachePut(cacheNames = "userProfileCache", key = "#user.username")
+    @CacheEvict(cacheNames = "userProfileImageCache", allEntries = true)
     public String updateUserPassword(String oldPassword, String newPassword, User user) {
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new WrongPasswordException("wrong old password");
@@ -126,6 +106,7 @@ public class DefaultUserService implements UserService {
         }
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepo.save(user);
-        return "password updated";
+        return newPassword;
     }
 }
+

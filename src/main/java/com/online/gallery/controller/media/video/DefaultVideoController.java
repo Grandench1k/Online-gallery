@@ -1,17 +1,18 @@
 package com.online.gallery.controller.media.video;
 
+import com.online.gallery.dto.request.VideoDetailsRequest;
+import com.online.gallery.dto.request.VideoFileUploadRequest;
 import com.online.gallery.dto.response.DataResponse;
-import com.online.gallery.model.media.Video;
+import com.online.gallery.dto.response.PresignedLinkResponse;
+import com.online.gallery.entity.media.Video;
+import com.online.gallery.entity.user.User;
 import com.online.gallery.service.media.video.VideoService;
 import com.online.gallery.service.user.UserService;
 import jakarta.validation.Valid;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -26,41 +27,67 @@ public class DefaultVideoController implements VideoController {
     }
 
     @GetMapping
-    public ResponseEntity<DataResponse<List<Video>>> listAllVideos(Authentication authentication) {
-        return ResponseEntity
-                .ok()
-                .body(new DataResponse<>(videoService.findAllVideos(userService.getUserId(authentication))));
+    public ResponseEntity<DataResponse<List<Video>>> listAllVideos(
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                videoService.findAllVideos(userService.getUserId(user))));
     }
 
-    @GetMapping(value = "/{videoId}", produces = {"video/mp4", "video/mpeg", "video/ogg"})
-    public ResponseEntity<DataResponse<byte[]>> getVideoById(
+    @GetMapping("/{videoId}")
+    public ResponseEntity<DataResponse<Video>> getVideoById(
             @PathVariable String videoId,
-            Authentication authentication) {
-        return ResponseEntity
-                .ok(new DataResponse<>(videoService.findVideoById(videoId, userService.getUserId(authentication))));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                videoService.findVideoById(videoId, userService.getUserId(user))));
     }
 
-    @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @GetMapping("/generate-get-url/{videoId}")
+    public ResponseEntity<PresignedLinkResponse> generatePresignedGetVideoUrl(
+            @PathVariable String videoId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(videoService.generatePresignedGetVideoUrl(
+                videoId, userService.getUserId(user)));
+    }
+
+    @PostMapping("/generate-upload-url")
+    public ResponseEntity<PresignedLinkResponse> prepareVideoUpload(
+            @RequestBody @Valid VideoFileUploadRequest videoFileUploadRequest,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(videoService.generatePresignedPutUrl(
+                videoFileUploadRequest, userService.getUserId(user)));
+    }
+
+    @PostMapping()
     public ResponseEntity<DataResponse<Video>> saveVideo(
-            @RequestPart @Valid Video video,
-            @RequestPart MultipartFile videoFile,
-            Authentication authentication) throws IOException {
-        return ResponseEntity
-                .ok(new DataResponse<>(videoService.saveVideo(video, videoFile, userService.getUserId(authentication))));
+            @RequestBody @Valid Video video,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                videoService.saveVideo(video, userService.getUserId(user))));
+    }
+
+    @PutMapping("/{videoId}")
+    public ResponseEntity<DataResponse<Video>> updateVideoById(
+            @RequestBody @Valid Video video,
+            @PathVariable String videoId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                videoService.updateVideoById(video, videoId, userService.getUserId(user))));
     }
 
     @PatchMapping("/{videoId}")
-    public ResponseEntity<DataResponse<Video>> updateVideoById(
+    public ResponseEntity<DataResponse<Video>> updateVideoDetailsById(
+            @RequestBody @Valid VideoDetailsRequest videoDetailsRequest,
             @PathVariable String videoId,
-            @RequestBody @Valid Video video,
-            Authentication authentication) {
-        return ResponseEntity
-                .ok(new DataResponse<>(videoService.updateVideoById(videoId, video, userService.getUserId(authentication))));
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                videoService.updateVideoDetailsById(videoDetailsRequest, videoId, userService.getUserId(user))));
     }
 
     @DeleteMapping("/{videoId}")
-    public ResponseEntity<DataResponse<Video>> deleteVideoById(@PathVariable String videoId, Authentication authentication) {
-        return ResponseEntity
-                .ok(new DataResponse<>(videoService.deleteVideoById(videoId, userService.getUserId(authentication))));
+    public ResponseEntity<DataResponse<Video>> deleteVideoById(
+            @PathVariable String videoId,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(new DataResponse<>(
+                videoService.deleteVideoById(videoId, userService.getUserId(user))));
     }
 }

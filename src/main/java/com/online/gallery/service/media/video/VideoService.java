@@ -1,20 +1,33 @@
 package com.online.gallery.service.media.video;
 
-import com.online.gallery.model.media.Video;
-import org.springframework.web.multipart.MultipartFile;
+import com.online.gallery.dto.request.VideoDetailsRequest;
+import com.online.gallery.dto.request.VideoFileUploadRequest;
+import com.online.gallery.dto.response.PresignedLinkResponse;
+import com.online.gallery.entity.media.Video;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface VideoService {
+    String generateLinkWithUserIdForS3Videos(String videoId, String userId);
 
     List<Video> findAllVideos(String userId);
 
-    byte[] findVideoById(String videoId, String userId);
+    Video findVideoById(String videoId, String userId);
 
-    Video saveVideo(Video videoToSave, MultipartFile videoFile, String userId) throws IOException;
+    PresignedLinkResponse generatePresignedGetVideoUrl(String videoId, String userId);
 
-    Video updateVideoById(String videoId, Video video, String userId);
+    PresignedLinkResponse generatePresignedPutUrl(
+            VideoFileUploadRequest videoFileUploadRequest,
+            String userId);
+
+    Video saveVideo(Video video, String userId);
+
+    Video updateVideoById(Video video, String videoId, String userId);
+
+    Video updateVideoDetailsById(VideoDetailsRequest videoDetailsRequest,
+                                 String videoId,
+                                 String userId);
 
     Video deleteVideoById(String videoId, String userId);
+
 }

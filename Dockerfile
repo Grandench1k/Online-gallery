@@ -10,6 +10,6 @@ RUN mvn clean package -DskipTests
 FROM openjdk:21
 WORKDIR /app
 
-COPY --from=build /app/target/gallery-1.0.0.jar /app
+COPY --from=build /app/target/gallery-1.5.0.jar /app
 
-ENTRYPOINT ["java", "-jar", "gallery-1.0.0.jar"]
+ENTRYPOINT ["java", "-jar", "gallery-1.5.0.jar"]

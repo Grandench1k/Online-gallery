@@ -10,19 +10,23 @@ import com.online.gallery.dto.response.MessageResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.IOException;
 
-@Tag(name = "AuthController",
-        description = "Controller for authentication")
+@Tag(name = "Auth controller", description = "controller for handling authentication operations "
+        + "such as sign up, sign in, and password management")
 public interface AuthController {
+
     @Operation(summary = "Sign up",
             description = "registers a new user with the provided credentials and sends a "
                     + "confirmation email. Requires confirmation of the email to activate the account")
@@ -37,8 +41,8 @@ public interface AuthController {
     @ApiResponse(responseCode = "500", description = "messaging exception occurred",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<AuthTokenResponse> processSignUp(
-            SignUpRequest request) throws MessagingException;
+    ResponseEntity<AuthTokenResponse> processSignUp(@RequestBody @Valid SignUpRequest request)
+            throws MessagingException;
 
     @Operation(summary = "Complete sign up",
             description = "completes the registration process by verifying the provided token "
@@ -52,7 +56,7 @@ public interface AuthController {
     @ApiResponse(responseCode = "404", description = "token or user not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<AuthTokenResponse> completeSignUp(String token);
+    ResponseEntity<AuthTokenResponse> completeSignUp(@PathVariable String token);
 
     @Operation(summary = "Sign in",
             description = "authenticates the user with provided credentials and returns "
@@ -68,7 +72,7 @@ public interface AuthController {
     @ApiResponse(responseCode = "404", description = "user not found",
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<AuthTokenResponse> signIn(SignInRequest request);
+    ResponseEntity<AuthTokenResponse> signIn(@RequestBody @Valid SignInRequest request);
 
     @Operation(summary = "Log out",
             description = "logs out the current user by clearing the security context")
@@ -76,7 +80,6 @@ public interface AuthController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = MessageResponse.class)))
     ResponseEntity<MessageResponse> logOut();
-
 
     @Operation(summary = "Refresh access token",
             description = "refreshes the user's authentication tokens by validating the "
@@ -89,9 +92,8 @@ public interface AuthController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
     @SecurityRequirement(name = "Authorization")
-    void refreshToken(
-            HttpServletRequest request,
-            HttpServletResponse response) throws IOException;
+    void refreshToken(HttpServletRequest request, HttpServletResponse response)
+            throws IOException;
 
     @Operation(summary = "Start password reset",
             description = "initiates the password reset process by sending a reset link to the "
@@ -106,21 +108,8 @@ public interface AuthController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<MessageResponse> forgotPassword(
-            PasswordResetStartRequest passwordResetStartRequest) throws MessagingException;
-
-    @Operation(summary = "Start password reset",
-            description = "initiates the password reset process by sending a reset link to the "
-                    + "user's email")
-    @ApiResponse(responseCode = "200", description = "password reset link sent successfully",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = MessageResponse.class)))
-    @ApiResponse(responseCode = "400", description = "account not activated or email not found",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ExceptionResponse.class)))
-    @ApiResponse(responseCode = "404", description = "user not found",
-            content = @Content(mediaType = "application/json",
-                    schema = @Schema(implementation = ExceptionResponse.class)))
-    ResponseEntity<MessageResponse> startPasswordReset(String token);
+            @RequestBody @Valid PasswordResetStartRequest passwordResetStartRequest)
+            throws MessagingException;
 
     @Operation(summary = "Complete password reset",
             description = "completes the password reset process using the provided token and "
@@ -136,6 +125,7 @@ public interface AuthController {
             content = @Content(mediaType = "application/json",
                     schema = @Schema(implementation = ExceptionResponse.class)))
     ResponseEntity<MessageResponse> completePasswordReset(
-            String token,
-            PasswordResetCompleteRequest passwordResetCompleteRequest);
+            @RequestBody @Valid PasswordResetCompleteRequest passwordResetCompleteRequest,
+            @PathVariable String token);
 }
+

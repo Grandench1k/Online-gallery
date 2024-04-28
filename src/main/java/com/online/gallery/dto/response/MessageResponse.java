@@ -16,7 +16,7 @@ public class MessageResponse {
             example = "200", defaultValue = "200")
     private final int status;
 
-    @Schema(description = "timestamp of when the error was sent",
+    @Schema(description = "timestamp ofwhen the error was sent",
             example = "2021-04-12T10:15:30+00:00")
     private final ZonedDateTime timestamp;
 

@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>com.online</groupId>
 	<artifactId>gallery</artifactId>
-	<version>1.0.0</version>
+	<version>1.5.0</version>
 	<name>online-gallery</name>
 	<description>Online gallery backend API</description>
 	<properties>

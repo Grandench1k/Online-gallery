@@ -57,7 +57,7 @@ public class DefaultExceptionHandler {
     @ExceptionHandler({UserNotFoundException.class,
             ImageNotFoundException.class,
             VideoNotFoundException.class})
-    public ResponseEntity<ExceptionResponse> handleNotFoundExceptions(
+    public ResponseEntity<ExceptionResponse> handleUserNotFoundException(
             RuntimeException e) {
         return buildResponse(e.getMessage(), HttpStatus.NOT_FOUND);
     }
@@ -89,8 +89,9 @@ public class DefaultExceptionHandler {
 
     @ExceptionHandler({ImageDuplicationException.class,
             VideoDuplicationException.class,
-            UserDuplicationException.class})
-    public ResponseEntity<ExceptionResponse> handleConflictExceptions(
+            UserDuplicationException.class,
+            UserAccessDeniedException.class})
+    public ResponseEntity<ExceptionResponse> handleImageDuplicationException(
             RuntimeException e) {
         return buildResponse(e.getMessage(), HttpStatus.CONFLICT);
     }
@@ -99,7 +100,7 @@ public class DefaultExceptionHandler {
             WrongPasswordException.class,
             UserNotEnabledException.class,
             PasswordsMatchException.class})
-    public ResponseEntity<ExceptionResponse> handleHttpRequestMethodNotAllowedExceptions(
+    public ResponseEntity<ExceptionResponse> handleHttpRequestMethodNotAllowedException(
             RuntimeException e) {
         return buildResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
     }

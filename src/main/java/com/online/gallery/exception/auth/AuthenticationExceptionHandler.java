@@ -29,7 +29,7 @@ public class AuthenticationExceptionHandler {
     }
 
     @ExceptionHandler({TokenExpirationException.class,
-            TokenInvalidException.class})
+            AuthException.class})
     public ResponseEntity<ExceptionResponse> handleBadRequestExceptions(RuntimeException e) {
         return buildResponse(e.getMessage(), HttpStatus.BAD_REQUEST);
     }

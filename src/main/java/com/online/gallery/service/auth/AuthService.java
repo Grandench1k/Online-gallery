@@ -12,11 +12,12 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import java.io.IOException;
 
 public interface AuthService {
-    AuthTokenResponse processSignUp(SignUpRequest request) throws UserDuplicationException, MessagingException;
+    AuthTokenResponse processSignUp(SignUpRequest request)
+            throws UserDuplicationException, MessagingException;
 
     AuthTokenResponse signIn(SignInRequest request) throws UsernameNotFoundException;
 
-    String completeSignUp(String token);
+    AuthTokenResponse completeSignUp(String token);
 
     void refreshToken(HttpServletRequest request, HttpServletResponse response) throws IOException;
 

@@ -1,20 +1,29 @@
 package com.online.gallery.service.media.image;
 
-import com.online.gallery.model.media.Image;
-import org.springframework.web.multipart.MultipartFile;
+import com.online.gallery.dto.request.ImageDetailsRequest;
+import com.online.gallery.dto.request.ImageFileUploadRequest;
+import com.online.gallery.dto.response.PresignedLinkResponse;
+import com.online.gallery.entity.media.Image;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface ImageService {
 
     List<Image> findAllImages(String userId);
 
-    byte[] findImageById(String imageId, String userId);
+    Image findImageById(String imageId, String userId);
 
-    Image saveImage(MultipartFile imageFile, Image image, String userId) throws IOException;
+    PresignedLinkResponse generatePresignedGetImageUrl(String imageId, String userId);
 
-    Image updateImageById(String imageId, Image image, String userId);
+    PresignedLinkResponse generatePresignedPutUrl(
+            ImageFileUploadRequest imageFileUploadRequest,
+            String userId);
+
+    Image saveImage(Image imageToSave, String userId);
+
+    Image updateImageById(Image newImage, String imageId, String userId);
+
+    Image updateImageDetailsById(ImageDetailsRequest imageDetailsRequest, String imageId, String userId);
 
     Image deleteImageById(String imageId, String userId);
 }

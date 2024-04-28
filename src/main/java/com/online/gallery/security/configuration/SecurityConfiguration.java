@@ -17,7 +17,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
     private final JWTAuthFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
-    private final String[] publicRequests = {"/api/v1/auth/**",
+    private final String[] publicRequests = {"api/v1/auth/**",
             "/online-gallery-docs/**",
             "/swagger-ui.html",
             "/swagger-ui/**"};

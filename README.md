@@ -80,7 +80,7 @@ Ensure your development environment is equipped with Java 17, MongoDB, Redis, Do
 
 Example of API work:
 
-GET /api/v1/images HTTP/1.1
+GET api/v1/images HTTP/1.1
 ```
 Host: example.com
 Accept: application/json

@@ -1,21 +1,24 @@
 package com.online.gallery.service.user;
 
-import com.online.gallery.model.user.User;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
+import com.online.gallery.dto.request.ImageFileUploadRequest;
+import com.online.gallery.dto.response.PresignedLinkResponse;
+import com.online.gallery.entity.media.Image;
+import com.online.gallery.entity.user.User;
 
 public interface UserService {
-    String getUserId(Authentication authentication);
+    String getUserId(User user);
 
-    User getUser(Authentication authentication);
+    User getUser(User user);
 
-    byte[] getProfileImage(User user);
+    PresignedLinkResponse generatePresignedGetUrl(User user);
 
-    String saveProfileImage(MultipartFile profileImageFile, User user) throws IOException;
+    PresignedLinkResponse generatePresignedPutUrl(
+            ImageFileUploadRequest imageFileUploadRequest,
+            User user);
 
-    String updateProfileImage(MultipartFile profileImageFile, User user) throws IOException;
+    User saveProfileImage(Image profileImageToSave, User user);
 
-    String updateUserPassword(String oldPassword, String newPassword, User user);
+    String updateUserPassword(String oldPassword,
+                              String newPassword,
+                              User user);
 }

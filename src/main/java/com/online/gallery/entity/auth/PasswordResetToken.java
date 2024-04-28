@@ -1,4 +1,4 @@
-package com.online.gallery.model.auth;
+package com.online.gallery.entity.auth;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -9,16 +9,16 @@ import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@Document(collection = "confirmationToken")
-public class ConfirmationToken {
+@Document(collection = "passwordResetToken")
+public class PasswordResetToken {
     @Id
     private String id;
-    private String userId;
+    private String email;
     private LocalDateTime expiredAt;
 
-    public ConfirmationToken(String id, String userId) {
+    public PasswordResetToken(String id, String email) {
         this.id = id;
-        this.userId = userId;
+        this.email = email;
         this.expiredAt = LocalDateTime.now().plusMinutes(15);
     }
 

@@ -1,7 +1,6 @@
-package com.online.gallery.model.user;
+package com.online.gallery.entity.user;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.online.gallery.exception.user.UserNotEnabledException;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,7 +29,8 @@ public class User implements UserDetails {
     private Role role;
     private boolean enabled;
 
-    public User(String id, String nickname, String email, String password, String profileImageName, Role role, boolean enabled) {
+    public User(String id, String nickname, String email, String password,
+                String profileImageName, Role role, boolean enabled) {
         this.id = id;
         this.nickname = nickname;
         this.email = email;
@@ -38,10 +38,6 @@ public class User implements UserDetails {
         this.profileImageName = profileImageName;
         this.role = role;
         this.enabled = enabled;
-    }
-
-    public static UserBuilder builder() {
-        return new UserBuilder();
     }
 
     @Override
@@ -79,13 +75,7 @@ public class User implements UserDetails {
         return this.enabled;
     }
 
-    public void checkIfUserEnabled() {
-        if (!this.isEnabled()) {
-            throw new UserNotEnabledException("please confirm registration with mail.");
-        }
-    }
-
     public String toString() {
-        return "User(id=" + this.getId() + ", username=" + this.getNickname() + ", email=" + this.getEmail() + ", password=" + this.getPassword() + ", profileImageId=" + this.getProfileImageName() + ", role=" + this.getRole() + ", enabled=" + this.isEnabled() + ")";
+        return "User(id=" + this.getId() + ", nickname=" + this.getNickname() + ", email=" + this.getEmail() + ", password=" + this.getPassword() + ", profileImageName=" + this.getProfileImageName() + ", role=" + this.getRole() + ", enabled=" + this.isEnabled() + ")";
     }
 }
