@@ -1,0 +1,211 @@
+[33mcommit e94fa2acc53a84a719a7fcc7178ed550dc8b2ba2[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sun Apr 28 14:27:21 2024 +0300
+
+    fix issue #1
+
+[33mcommit 8470b6474af195b239e7ad9e2af986336eb89173[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Thu Apr 25 20:59:10 2024 +0300
+
+    fix issue #2
+
+[33mcommit cdc6c22b0e59a5ffd327b2aa7f41c8854b484996[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Thu Apr 25 20:32:52 2024 +0300
+
+    handle exception refreshToken method
+
+[33mcommit 094f1d219819b712b49565cd34c8ca522e2f1f22[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Thu Apr 25 20:13:41 2024 +0300
+
+    change imports of repositories in test classes
+
+[33mcommit 1b160320226d240e063d40b8d3feafadf26bd2b5[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Thu Apr 25 20:07:59 2024 +0300
+
+    add catching jwt exceptions in method of JWTAuthFilter
+
+[33mcommit 5125b165fbea74dd75add7401727aac6afb07cdf[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Thu Apr 25 20:06:24 2024 +0300
+
+    remove authEntryPoint class and change security configuration
+
+[33mcommit 4d6a9114e8aa8bab9fc5c4eb914db0e1d56f838b[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Thu Apr 25 20:03:11 2024 +0300
+
+    change naming of all repository classes with repo
+
+[33mcommit eeb45c4816b5cf64e4dc50e10c728f62a80d4088[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Wed Apr 24 21:36:50 2024 +0300
+
+    fix issue with setting expiration time in token's constructors
+
+[33mcommit 9696dbb23bfc21560b21ded8bd5a67cc53ff6692[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Wed Apr 24 21:35:46 2024 +0300
+
+    add data and message responses instead of just ok response
+
+[33mcommit a346af9d88f05368b4c9d09a7a6cf1d77137c4fc[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Wed Apr 24 13:56:20 2024 +0300
+
+    change names of methods in services
+
+[33mcommit b687b4d1dfb6d07dd5735b74f83ac90dec9fe3d5[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Tue Apr 23 23:05:56 2024 +0300
+
+    refactor code, add documentation in all controller interfaces, remove unnecessary classes
+
+[33mcommit 6dc6f7d1d4253b2a2cb1f2c849e016a652e5ff6c[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Tue Apr 23 21:39:20 2024 +0300
+
+    documentate all requests for swagger
+
+[33mcommit 595b11dc0d5ff28310c11893a5a38254d2087ad9[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Tue Apr 23 21:11:21 2024 +0300
+
+    add new mehods isExpired in tokens and refactor AuthService
+
+[33mcommit 3be7fce67bd54aa8a515b98daac104fa5b7b71e7[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Tue Apr 23 21:07:25 2024 +0300
+
+    change field profileImageId to profileImageName of class User.class
+
+[33mcommit 331908a6f0c333ba453ba72a116692bbd9c5f580[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Tue Apr 23 21:01:48 2024 +0300
+
+    change field url to filePath of clas Image.class
+
+[33mcommit 4a8546f3e2fc93a713054a8b3e53ac426913daeb[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Tue Apr 23 20:59:12 2024 +0300
+
+    change field url to filePath of class Video.class
+
+[33mcommit be73063ffb06d0aed31ffce13835ae4b9a5c85f7[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Tue Apr 23 20:35:40 2024 +0300
+
+    remove field createdAt in User.class
+
+[33mcommit 5ef10047d6fb113e679882e548b16b54e8a9990d[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Thu Apr 11 19:14:08 2024 +0300
+
+    changed all annotations @Validated with @Valid
+
+[33mcommit ad1d3f3eec047724f6375f147367e7b272b76068[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Thu Apr 11 19:05:49 2024 +0300
+
+    organized folders and optimize imports
+
+[33mcommit 4a56a1b7b48d02da27576afec5bfe341acc6dc7e[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Tue Apr 2 17:34:30 2024 +0300
+
+    optimize code for easier usage
+
+[33mcommit 22f458ecbc2c287b5ef97c4f804f04c2959f0669[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sun Mar 31 16:19:58 2024 +0300
+
+    refactoring class organization and naming
+
+[33mcommit 0fecca1c263f9f054db634a4abd5ee4e5cecb700[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sun Mar 31 15:58:45 2024 +0300
+
+    organizing folders
+
+[33mcommit f101354c8720014f4958d970439f51cf5ee8d61e[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sun Mar 31 15:38:35 2024 +0300
+
+    change API endpoints
+
+[33mcommit dfa8347928fd646f130b0419518f71e099f8b350[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sun Mar 31 14:29:32 2024 +0300
+
+    minimize use of lombok
+
+[33mcommit e39128892a48940e731d5626e750fab103872e24[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sun Mar 31 14:11:56 2024 +0300
+
+    update naming in 'exception' folder to improve readability
+
+[33mcommit 434103000da1ee4e843b078e6f1c629d95a709a4[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sun Mar 31 13:43:41 2024 +0300
+
+    remove unnecessary file UsernameNotFound.java
+
+[33mcommit 219fbf75a27b2aa3139bb67baf92936c794b8ffb[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sun Mar 31 13:28:22 2024 +0300
+
+    disable async for s3
+
+[33mcommit 8ffa3d0f3acf116d290332039c45d6209ec3425d[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sun Mar 31 13:26:20 2024 +0300
+
+    change dockerfile and docker compose
+
+[33mcommit ce63de9e29b3b724e1be679862b56f0a49153738[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sat Mar 30 19:42:55 2024 +0300
+
+    change test directories
+
+[33mcommit 701e9d14b8835587066f430428263cd77d75c164[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sat Mar 30 19:41:35 2024 +0300
+
+    change application.properties and update dependencies in pom.xml
+
+[33mcommit 6204640b971658306dee39811dbb668b703c502d[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sat Mar 30 19:39:37 2024 +0300
+
+    change directories and file locations
+
+[33mcommit cb134ad74fedb22634cc3743ee88b04174d89520[m
+Author: Egor <121306826+Grandench1k@users.noreply.github.com>
+Date:   Sat Mar 30 14:57:00 2024 +0300
+
+    Update README.md
+    
+    overall readme update
+
+[33mcommit 8b0b49d953ef0b14b5f5d9907fbbf0ec1634f223[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sat Oct 21 19:23:29 2023 +0300
+
+    inserted minor edits
+
+[33mcommit af8d56cc600dd8f132b98100bc1436fbc7510520[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Thu Sep 21 14:54:01 2023 +0300
+
+    change project structure
+
+[33mcommit f755dd6c6152aafba4f51d2afaff18492af4d547[m
+Author: Grandench1k <salams2371@gmail.com>
+Date:   Sat Sep 16 12:54:50 2023 +0300
+
+    online-gallery API v1

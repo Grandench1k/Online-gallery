@@ -19,9 +19,9 @@ public class DefaultJwtService implements JwtService {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    @Value("${jwt.access.token.expiration.time.ms}")
+    @Value("${jwt.token.expiration.time.ms.access}")
     private long accessTokenExpirationDate;
-    @Value("${jwt.refresh.token.expiration.time.ms}")
+    @Value("${jwt.token.expiration.time.ms.refresh}")
     private long refreshTokenExpirationDate;
 
     public String extractUsername(String token) {

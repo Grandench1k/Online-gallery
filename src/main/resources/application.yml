@@ -1,0 +1,55 @@
+spring:
+  data:
+    mongodb:
+      host: mongodb
+      port: 27017
+      database: online-gallery
+    redis:
+      host: cache
+      port: 6379
+  mail:
+    host: #smtp mail host
+    port: #smtp mail port
+    #Authentication details for the SMTP server.
+    username:
+    password:
+    #Properties for smtp server
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          port: #smtp mail port
+          auth: true
+          starttls:
+            enable: true
+            required: true
+# JWT Configuration
+jwt:
+  secret:
+  token:
+    expiration:
+      time:
+        ms:
+          access: 10000
+          refresh: 50000
+aws:
+  region: #aws region
+  s3:
+    buckets:
+      main-bucket: #aws bucket name
+    get:
+      expiration:
+        s:
+          image: 60
+          video: 300
+    put:
+      expiration:
+        s:
+          image: 120
+          video: 600
+springdoc:
+  api-docs:
+    path: /online-gallery-docs
+  swagger-ui:
+    path: swagger-ui.html

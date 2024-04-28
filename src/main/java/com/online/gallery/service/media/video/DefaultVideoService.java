@@ -30,10 +30,10 @@ public class DefaultVideoService implements VideoService {
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
 
-    @Value("${aws.s3.video.get.expiration.s}")
+    @Value("${aws.s3.get.expiration.s.video}")
     private long videoGetExpiration;
 
-    @Value("${aws.s3.video.put.expiration.s}")
+    @Value("${aws.s3.put.expiration.s.video}")
     private long videoPutExpiration;
 
     public DefaultVideoService(VideoRepo videoRepo, S3service s3service) {

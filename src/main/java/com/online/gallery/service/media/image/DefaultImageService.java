@@ -29,9 +29,9 @@ public class DefaultImageService implements ImageService {
     @Value("${aws.s3.buckets.main-bucket}")
     private String bucketName;
 
-    @Value("${aws.s3.image.get.expiration.s}")
+    @Value("${aws.s3.get.expiration.s.image}")
     private long imageGetExpiration;
-    @Value("${aws.s3.image.put.expiration.s}")
+    @Value("${aws.s3.put.expiration.s.image}")
     private long imagePutExpiration;
 
     public DefaultImageService(ImageRepo imageRepo, S3service s3service) {

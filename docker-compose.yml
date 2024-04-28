@@ -2,11 +2,13 @@ version: '3.8'
 
 services:
   app:
+    image: app
     container_name: app
     build:
+      context: .
       dockerfile: Dockerfile
     depends_on:
-      mongo:
+      mongodb:
         condition: service_healthy
       cache:
         condition: service_healthy
@@ -15,15 +17,14 @@ services:
     environment:
       REDIS_HOST: cache
       REDIS_PORT: 6379
-      MONGODB_HOST: mongo
-      MONGODB_PORT: 27017
+      MONGODB_URL: mongodb://mongodb:27017/online-gallery
       AWS_ACCESS_KEY_ID:
       AWS_SECRET_ACCESS_KEY:
       AWS_REGION:
     networks:
       - app-network
 
-  mongo:
+  mongodb:
     image: mongo:7
     container_name: mongo
     restart: always
@@ -43,7 +44,7 @@ services:
     restart: always
     command: redis-server
     volumes:
-      - redis-data:/data
+      - redis-data:/data/cache
     networks:
       - app-network
     healthcheck:
